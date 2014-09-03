@@ -26,17 +26,20 @@ protected:
     void resizeEvent  (QResizeEvent *event);
 
 private:
-    void  initGrid        ();
-    void  generateNewNode ();
-    bool  isGameOver      ();
+    void initGrid        ();
+    void generateNewNode ();
+    bool isGameOver      ();
+    bool moveRoutineUp   ();
 
-    void setRectSize      (int rectSize);
+    void moveRectsInColumn(quint8 column);
+
+    void setRectSize     (int rectSize);
 
     float rnd01           ();
     unsigned short rnd0or1();
 
-    static const quint16 m_fieldSize = 4;
-    static const QColor  m_backroundColor;
+    static const quint8 m_fieldSize = 4;
+    static const QColor m_backroundColor;
 
     int             m_rectSize;
     qreal           m_rectMargin;

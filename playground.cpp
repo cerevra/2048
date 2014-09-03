@@ -79,6 +79,7 @@ void Playground::keyPressEvent(QKeyEvent *event)
         generateNewNode();
         break;
     case Qt::Key_Up:
+        moveRoutineUp();
         isGameOver();
         generateNewNode();
         break;
@@ -132,6 +133,55 @@ bool Playground::isGameOver()
 {
     // todo
     return false;
+}
+
+bool Playground::moveRoutineUp()
+{
+    bool result = false;
+
+    // todo: optimize
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize-1; ++y)
+        {
+            moveRectsInColumn(x);
+
+            quint16 curValue = m_grid[x][y].value();
+            if(!curValue)
+                break;
+
+            if(curValue == m_grid[x][y+1].value())
+            {
+                m_grid[x][y  ].setValue(curValue*2);
+                m_grid[x][y+1].setValue(0);
+            }
+        }
+    }
+
+    return result;
+}
+
+// todo: optimize
+// up only
+void Playground::moveRectsInColumn(quint8 column)
+{
+    for(int y = 0; y < m_fieldSize-1; ++y)
+    {
+        if(!m_grid[column][y].value())
+        {
+            int yFwd;
+            for(yFwd = y+1; yFwd < m_fieldSize; ++yFwd)
+            {
+                if(m_grid[column][yFwd].value())
+                {
+                    m_grid[column][y].setValue(m_grid[column][yFwd].value());
+                    m_grid[column][yFwd].setValue(0);
+                }
+            }
+            if(yFwd == m_fieldSize)
+                break;
+        }
+    }
 }
 
 void Playground::setRectSize(int rectSize)
