@@ -29,9 +29,18 @@ private:
     void initGrid        ();
     void generateNewNode ();
     bool isGameOver      ();
-    bool moveRoutineUp   ();
 
-    void moveRectsInColumn(quint8 column);
+    void swapNodes       (int xFrom, int yFrom, int xTo, int yTo);
+
+    bool moveRoutineUp   ();
+    bool moveRoutineDown ();
+    bool moveRoutineRight();
+    bool moveRoutineLeft ();
+
+    void moveRectsInColumnUp   (quint8 column);
+    void moveRectsInColumnDown (quint8 column);
+    void moveRectsInRowRight   (quint8 row);
+    void moveRectsInRowLeft    (quint8 row);
 
     void setRectSize     (int rectSize);
 

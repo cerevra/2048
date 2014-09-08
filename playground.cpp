@@ -67,14 +67,17 @@ void Playground::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Left:
+        moveRoutineLeft();
         isGameOver();
         generateNewNode();
         break;
     case Qt::Key_Right:
+        moveRoutineRight();
         isGameOver();
         generateNewNode();
         break;
     case Qt::Key_Down:
+        moveRoutineDown();
         isGameOver();
         generateNewNode();
         break;
@@ -135,6 +138,12 @@ bool Playground::isGameOver()
     return false;
 }
 
+void Playground::swapNodes(int xFrom, int yFrom, int xTo, int yTo)
+{
+    m_grid[xTo  ][yTo  ].setValue(m_grid[xFrom][yFrom].value());
+    m_grid[xFrom][yFrom].setValue(0);
+}
+
 bool Playground::moveRoutineUp()
 {
     bool result = false;
@@ -144,7 +153,7 @@ bool Playground::moveRoutineUp()
     {
         for(int y = 0; y < m_fieldSize-1; ++y)
         {
-            moveRectsInColumn(x);
+            moveRectsInColumnUp(x);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -161,9 +170,87 @@ bool Playground::moveRoutineUp()
     return result;
 }
 
+bool Playground::moveRoutineDown()
+{
+    bool result = false;
+
+    // todo: optimize
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = m_fieldSize-1; y > 0; --y)
+        {
+            moveRectsInColumnDown(x);
+
+            quint16 curValue = m_grid[x][y].value();
+            if(!curValue)
+                break;
+
+            if(curValue == m_grid[x][y-1].value())
+            {
+                m_grid[x][y  ].setValue(curValue*2);
+                m_grid[x][y-1].setValue(0);
+            }
+        }
+    }
+
+    return result;
+}
+
+bool Playground::moveRoutineRight()
+{
+    bool result = false;
+
+    // todo: optimize
+    for(int y = 0; y < m_fieldSize; ++y)
+    {
+        for(int x = m_fieldSize-1; x > 0; --x)
+        {
+            moveRectsInRowRight(y);
+
+            quint16 curValue = m_grid[x][y].value();
+            if(!curValue)
+                break;
+
+            if(curValue == m_grid[x-1][y].value())
+            {
+                m_grid[x  ][y].setValue(curValue*2);
+                m_grid[x-1][y].setValue(0);
+            }
+        }
+    }
+
+    return result;
+}
+
+bool Playground::moveRoutineLeft()
+{
+    bool result = false;
+
+    // todo: optimize
+    for(int y = 0; y < m_fieldSize; ++y)
+    {
+        for(int x = 0; x < m_fieldSize-1; ++x)
+        {
+            moveRectsInRowLeft(y);
+
+            quint16 curValue = m_grid[x][y].value();
+            if(!curValue)
+                break;
+
+            if(curValue == m_grid[x+1][y].value())
+            {
+                m_grid[x  ][y].setValue(curValue*2);
+                m_grid[x+1][y].setValue(0);
+            }
+        }
+    }
+
+    return result;
+}
+
 // todo: optimize
 // up only
-void Playground::moveRectsInColumn(quint8 column)
+void Playground::moveRectsInColumnUp(quint8 column)
 {
     for(int y = 0; y < m_fieldSize-1; ++y)
     {
@@ -174,11 +261,74 @@ void Playground::moveRectsInColumn(quint8 column)
             {
                 if(m_grid[column][yFwd].value())
                 {
-                    m_grid[column][y].setValue(m_grid[column][yFwd].value());
-                    m_grid[column][yFwd].setValue(0);
+                    swapNodes(column,yFwd,column,y);
+                    break;
                 }
             }
             if(yFwd == m_fieldSize)
+                break;
+        }
+    }
+}
+
+void Playground::moveRectsInColumnDown(quint8 column)
+{
+    for(int y = m_fieldSize-1; y > 0; --y)
+    {
+        if(!m_grid[column][y].value())
+        {
+            int yFwd;
+            for(yFwd = y-1; yFwd >= 0; --yFwd)
+            {
+                if(m_grid[column][yFwd].value())
+                {
+                    swapNodes(column,yFwd,column,y);
+                    break;
+                }
+            }
+            if(yFwd == m_fieldSize)
+                break;
+        }
+    }
+}
+
+void Playground::moveRectsInRowRight(quint8 row)
+{
+    for(int x = m_fieldSize-1; x > 0; --x)
+    {
+        if(!m_grid[x][row].value())
+        {
+            int xFwd;
+            for(xFwd = x-1; xFwd >= 0; --xFwd)
+            {
+                if(m_grid[xFwd][row].value())
+                {
+                    swapNodes(xFwd,row,x,row);
+                    break;
+                }
+            }
+            if(xFwd == m_fieldSize)
+                break;
+        }
+    }
+}
+
+void Playground::moveRectsInRowLeft(quint8 row)
+{
+    for(int x = 0; x < m_fieldSize-1; ++x)
+    {
+        if(!m_grid[x][row].value())
+        {
+            int xFwd;
+            for(xFwd = x+1; xFwd < m_fieldSize; ++xFwd)
+            {
+                if(m_grid[xFwd][row].value())
+                {
+                    swapNodes(xFwd,row,x,row);
+                    break;
+                }
+            }
+            if(xFwd == m_fieldSize)
                 break;
         }
     }
