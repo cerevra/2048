@@ -205,7 +205,7 @@ bool Playground::moveRoutineRight()
     {
         for(int x = m_fieldSize-1; x > 0; --x)
         {
-            moveRectsInRowRight(y);
+            moveRectsInRow(y,Direction::Right);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -299,7 +299,7 @@ void Playground::moveRectsInRowRight(quint8 row)
         if(!m_grid[x][row].value())
         {
             int xFwd;
-            for(xFwd = x-1; xFwd >= 0; --xFwd)
+            for(xFwd = x-1; xFwd > -1; --xFwd)
             {
                 if(m_grid[xFwd][row].value())
                 {
@@ -334,10 +334,88 @@ void Playground::moveRectsInRowLeft(quint8 row)
     }
 }
 
+void Playground::moveRectsInRow(quint8 row, Playground::Direction direct)
+{
+    Oper     oper;
+    SimpCalc simpCalc;
+    Equalation equal;
+
+    int indexFirst, indexFirstLimit;
+
+    switch (direct)
+    {
+    case Direction::Left:
+        oper            = &incr;
+        simpCalc        = &summ;
+        equal           = &lsth;
+        indexFirst      = 0;
+        indexFirstLimit = m_fieldSize-1;
+        break;
+    case Direction::Right:
+        oper            = &decr;
+        simpCalc        = &diff;
+        equal           = &grtn;
+        indexFirst      = m_fieldSize-1;
+        indexFirstLimit = 0;
+        break;
+    default:
+        return;
+        break;
+    }
+
+    for(; equal(indexFirst, indexFirstLimit); oper(indexFirst))
+    {
+        if(!m_grid[indexFirst][row].value())
+        {
+            int indexFwd;
+            for(indexFwd = simpCalc(indexFirst,1); equal(indexFwd, simpCalc(indexFirstLimit,1)); oper(indexFwd))
+            {
+                if(m_grid[indexFwd][row].value())
+                {
+                    swapNodes(indexFwd,row,indexFirst,row);
+                    break;
+                }
+            }
+            if(indexFwd == m_fieldSize)
+                break;
+        }
+    }
+}
+
 void Playground::setRectSize(int rectSize)
 {
     m_rectSize   = rectSize;
     m_rectMargin = rectSize/5;
+}
+
+int &Playground::incr(int &arg)
+{
+    return ++arg;
+}
+
+int &Playground::decr(int &arg)
+{
+    return --arg;
+}
+
+int Playground::summ(int x1, int x2)
+{
+    return x1+x2;
+}
+
+int Playground::diff(int x1, int x2)
+{
+    return x1-x2;
+}
+
+bool Playground::grtn(int x1, int x2)
+{
+    return x1>x2;
+}
+
+bool Playground::lsth(int x1, int x2)
+{
+    return x1<x2;
 }
 
 float Playground::rnd01()

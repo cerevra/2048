@@ -9,6 +9,11 @@
 
 class Playground : public QWidget
 {
+    typedef int& (*Oper      )(int&);
+    typedef int  (*SimpCalc  )(int,int);
+    typedef bool (*Equalation)(int,int);
+    enum class Direction {Up,Down,Right,Left};
+
     Q_OBJECT
 public:
     explicit Playground(QWidget *parent = 0);
@@ -42,7 +47,17 @@ private:
     void moveRectsInRowRight   (quint8 row);
     void moveRectsInRowLeft    (quint8 row);
 
+    void moveRectsInRow        (quint8 row, Direction direct);
+
     void setRectSize     (int rectSize);
+
+    // temporary solution (todo)
+    static int& incr(int& arg);
+    static int& decr(int& arg);
+    static int  summ(int x1, int x2);
+    static int  diff(int x1, int x2);
+    static bool grtn(int x1, int x2);
+    static bool lsth(int x1, int x2);
 
     float rnd01           ();
     unsigned short rnd0or1();
