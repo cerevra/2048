@@ -138,10 +138,15 @@ bool Playground::isGameOver()
     return false;
 }
 
-void Playground::swapNodes(int xFrom, int yFrom, int xTo, int yTo)
+void Playground::mergeNodes(int xFrom, int yFrom, int xTo, int yTo)
 {
     m_grid[xTo  ][yTo  ].setValue(m_grid[xFrom][yFrom].value());
     m_grid[xFrom][yFrom].setValue(0);
+}
+
+void Playground::mergeNodesInv(int xFrom, int yFrom, int xTo, int yTo)
+{
+    mergeNodes(yFrom, xFrom, yTo, xTo);
 }
 
 bool Playground::moveRoutineUp()
@@ -153,7 +158,7 @@ bool Playground::moveRoutineUp()
     {
         for(int y = 0; y < m_fieldSize-1; ++y)
         {
-            moveRectsInColumnUp(x);
+            moveRects(x,Direction::Up);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -179,7 +184,7 @@ bool Playground::moveRoutineDown()
     {
         for(int y = m_fieldSize-1; y > 0; --y)
         {
-            moveRectsInColumnDown(x);
+            moveRects(x,Direction::Down);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -205,7 +210,7 @@ bool Playground::moveRoutineRight()
     {
         for(int x = m_fieldSize-1; x > 0; --x)
         {
-            moveRectsInRow(y,Direction::Right);
+            moveRects(y,Direction::Right);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -231,7 +236,7 @@ bool Playground::moveRoutineLeft()
     {
         for(int x = 0; x < m_fieldSize-1; ++x)
         {
-            moveRectsInRowLeft(y);
+            moveRects(y,Direction::Left);
 
             quint16 curValue = m_grid[x][y].value();
             if(!curValue)
@@ -248,106 +253,25 @@ bool Playground::moveRoutineLeft()
     return result;
 }
 
-// todo: optimize
-// up only
-void Playground::moveRectsInColumnUp(quint8 column)
-{
-    for(int y = 0; y < m_fieldSize-1; ++y)
-    {
-        if(!m_grid[column][y].value())
-        {
-            int yFwd;
-            for(yFwd = y+1; yFwd < m_fieldSize; ++yFwd)
-            {
-                if(m_grid[column][yFwd].value())
-                {
-                    swapNodes(column,yFwd,column,y);
-                    break;
-                }
-            }
-            if(yFwd == m_fieldSize)
-                break;
-        }
-    }
-}
-
-void Playground::moveRectsInColumnDown(quint8 column)
-{
-    for(int y = m_fieldSize-1; y > 0; --y)
-    {
-        if(!m_grid[column][y].value())
-        {
-            int yFwd;
-            for(yFwd = y-1; yFwd >= 0; --yFwd)
-            {
-                if(m_grid[column][yFwd].value())
-                {
-                    swapNodes(column,yFwd,column,y);
-                    break;
-                }
-            }
-            if(yFwd == m_fieldSize)
-                break;
-        }
-    }
-}
-
-void Playground::moveRectsInRowRight(quint8 row)
-{
-    for(int x = m_fieldSize-1; x > 0; --x)
-    {
-        if(!m_grid[x][row].value())
-        {
-            int xFwd;
-            for(xFwd = x-1; xFwd > -1; --xFwd)
-            {
-                if(m_grid[xFwd][row].value())
-                {
-                    swapNodes(xFwd,row,x,row);
-                    break;
-                }
-            }
-            if(xFwd == m_fieldSize)
-                break;
-        }
-    }
-}
-
-void Playground::moveRectsInRowLeft(quint8 row)
-{
-    for(int x = 0; x < m_fieldSize-1; ++x)
-    {
-        if(!m_grid[x][row].value())
-        {
-            int xFwd;
-            for(xFwd = x+1; xFwd < m_fieldSize; ++xFwd)
-            {
-                if(m_grid[xFwd][row].value())
-                {
-                    swapNodes(xFwd,row,x,row);
-                    break;
-                }
-            }
-            if(xFwd == m_fieldSize)
-                break;
-        }
-    }
-}
-
-void Playground::moveRectsInRow(quint8 row, Playground::Direction direct)
+void Playground::moveRects(quint8 indexConst, Playground::Direction direct)
 {
     Oper     oper;
     SimpCalc simpCalc;
     Equalation equal;
+    NodeAccess access;
+    NodeMerge  merge;
 
     int indexFirst, indexFirstLimit;
 
+    // todo optimize
     switch (direct)
     {
     case Direction::Left:
         oper            = &incr;
         simpCalc        = &summ;
         equal           = &lsth;
+        access          = &Playground::getNodeRowConst;
+        merge           = &Playground::mergeNodes;
         indexFirst      = 0;
         indexFirstLimit = m_fieldSize-1;
         break;
@@ -355,6 +279,26 @@ void Playground::moveRectsInRow(quint8 row, Playground::Direction direct)
         oper            = &decr;
         simpCalc        = &diff;
         equal           = &grtn;
+        access          = &Playground::getNodeRowConst;
+        merge           = &Playground::mergeNodes;
+        indexFirst      = m_fieldSize-1;
+        indexFirstLimit = 0;
+        break;
+    case Direction::Up:
+        oper            = &incr;
+        simpCalc        = &summ;
+        equal           = &lsth;
+        access          = &Playground::getNodeColumnConst;
+        merge           = &Playground::mergeNodesInv;
+        indexFirst      = 0;
+        indexFirstLimit = m_fieldSize-1;
+        break;
+    case Direction::Down:
+        oper            = &decr;
+        simpCalc        = &diff;
+        equal           = &grtn;
+        access          = &Playground::getNodeColumnConst;
+        merge           = &Playground::mergeNodesInv;
         indexFirst      = m_fieldSize-1;
         indexFirstLimit = 0;
         break;
@@ -365,14 +309,14 @@ void Playground::moveRectsInRow(quint8 row, Playground::Direction direct)
 
     for(; equal(indexFirst, indexFirstLimit); oper(indexFirst))
     {
-        if(!m_grid[indexFirst][row].value())
+        if(!(this->*access)(indexFirst,indexConst).value())
         {
             int indexFwd;
             for(indexFwd = simpCalc(indexFirst,1); equal(indexFwd, simpCalc(indexFirstLimit,1)); oper(indexFwd))
             {
-                if(m_grid[indexFwd][row].value())
+                if((this->*access)(indexFwd,indexConst).value())
                 {
-                    swapNodes(indexFwd,row,indexFirst,row);
+                    (this->*merge)(indexFwd,indexConst,indexFirst,indexConst);
                     break;
                 }
             }
@@ -416,6 +360,16 @@ bool Playground::grtn(int x1, int x2)
 bool Playground::lsth(int x1, int x2)
 {
     return x1<x2;
+}
+
+Node &Playground::getNodeColumnConst(int index1, int index2)
+{
+    return m_grid[index2][index1];
+}
+
+Node &Playground::getNodeRowConst(int index1, int index2)
+{
+    return m_grid[index1][index2];
 }
 
 float Playground::rnd01()

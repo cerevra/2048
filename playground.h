@@ -12,6 +12,9 @@ class Playground : public QWidget
     typedef int& (*Oper      )(int&);
     typedef int  (*SimpCalc  )(int,int);
     typedef bool (*Equalation)(int,int);
+    typedef Node&(Playground::* NodeAccess)(int,int);
+    typedef void (Playground::* NodeMerge )(int,int,int,int);
+
     enum class Direction {Up,Down,Right,Left};
 
     Q_OBJECT
@@ -35,19 +38,15 @@ private:
     void generateNewNode ();
     bool isGameOver      ();
 
-    void swapNodes       (int xFrom, int yFrom, int xTo, int yTo);
+    void mergeNodes      (int xFrom, int yFrom, int xTo, int yTo);
+    void mergeNodesInv   (int xFrom, int yFrom, int xTo, int yTo);
 
     bool moveRoutineUp   ();
     bool moveRoutineDown ();
     bool moveRoutineRight();
     bool moveRoutineLeft ();
 
-    void moveRectsInColumnUp   (quint8 column);
-    void moveRectsInColumnDown (quint8 column);
-    void moveRectsInRowRight   (quint8 row);
-    void moveRectsInRowLeft    (quint8 row);
-
-    void moveRectsInRow        (quint8 row, Direction direct);
+    void moveRects        (quint8 indexConst, Direction direct);
 
     void setRectSize     (int rectSize);
 
@@ -58,6 +57,8 @@ private:
     static int  diff(int x1, int x2);
     static bool grtn(int x1, int x2);
     static bool lsth(int x1, int x2);
+    Node&       getNodeColumnConst(int index1, int index2);
+    Node&       getNodeRowConst   (int index1, int index2);
 
     float rnd01           ();
     unsigned short rnd0or1();
