@@ -38,15 +38,12 @@ private:
     void generateNewNode ();
     bool isGameOver      ();
 
-    void mergeNodes      (int xFrom, int yFrom, int xTo, int yTo);
-    void mergeNodesInv   (int xFrom, int yFrom, int xTo, int yTo);
+    void moveNode        (int xFrom, int yFrom, int xTo, int yTo);
+    void moveNodeInv     (int xFrom, int yFrom, int xTo, int yTo);
 
-    bool moveRoutineUp   ();
-    bool moveRoutineDown ();
-    bool moveRoutineRight();
-    bool moveRoutineLeft ();
+    bool moveRoutine     (Direction direction);
 
-    void moveRects        (quint8 indexConst, Direction direct);
+    void moveRects       (quint8 indexConst, Direction direction);
 
     void setRectSize     (int rectSize);
 

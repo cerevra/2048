@@ -42,7 +42,7 @@ void Playground::paintEvent(QPaintEvent *event)
             QRect currentRect(x*(m_rectSize + m_rectMargin),y*(m_rectSize + m_rectMargin),
                                  m_rectSize,m_rectSize);
             const Node& node = m_grid[x][y];
-            if(node.value())
+            if (node.value())
             {
                 painter.setPen  (node.color());
                 painter.setBrush(node.color());
@@ -67,22 +67,22 @@ void Playground::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Left:
-        moveRoutineLeft();
+        moveRoutine(Direction::Left);
         isGameOver();
         generateNewNode();
         break;
     case Qt::Key_Right:
-        moveRoutineRight();
+        moveRoutine(Direction::Right);
         isGameOver();
         generateNewNode();
         break;
     case Qt::Key_Down:
-        moveRoutineDown();
+        moveRoutine(Direction::Down);
         isGameOver();
         generateNewNode();
         break;
     case Qt::Key_Up:
-        moveRoutineUp();
+        moveRoutine(Direction::Up);
         isGameOver();
         generateNewNode();
         break;
@@ -122,7 +122,7 @@ void Playground::generateNewNode()
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-            if(!m_grid[x][y].value())
+            if (!m_grid[x][y].value())
                 vacantPlaces.append(QPoint(x,y));
         }
     }
@@ -138,36 +138,83 @@ bool Playground::isGameOver()
     return false;
 }
 
-void Playground::mergeNodes(int xFrom, int yFrom, int xTo, int yTo)
+void Playground::moveNode(int xFrom, int yFrom, int xTo, int yTo)
 {
     m_grid[xTo  ][yTo  ].setValue(m_grid[xFrom][yFrom].value());
     m_grid[xFrom][yFrom].setValue(0);
 }
 
-void Playground::mergeNodesInv(int xFrom, int yFrom, int xTo, int yTo)
+void Playground::moveNodeInv(int xFrom, int yFrom, int xTo, int yTo)
 {
-    mergeNodes(yFrom, xFrom, yTo, xTo);
+    moveNode(yFrom, xFrom, yTo, xTo);
 }
 
-bool Playground::moveRoutineUp()
+bool Playground::moveRoutine(Playground::Direction direction)
 {
     bool result = false;
 
-    // todo: optimize
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        for(int y = 0; y < m_fieldSize-1; ++y)
-        {
-            moveRects(x,Direction::Up);
+    Movement   move;
+    Arithmetic arithmOper;
+    Comparison compare;
+    NodeAccess access;
 
-            quint16 curValue = m_grid[x][y].value();
-            if(!curValue)
+    int indexInit, indexLimit;
+
+    // todo optimize
+    switch (direction)
+    {
+    case Direction::Left:
+        move       = &incr;
+        arithmOper = &summ;
+        compare    = &lsth;
+        access     = &Playground::getNodeRowConst;
+        indexInit  = 0;
+        indexLimit = m_fieldSize-1;
+        break;
+    case Direction::Right:
+        move       = &decr;
+        arithmOper = &diff;
+        compare    = &grtn;
+        access     = &Playground::getNodeRowConst;
+        indexInit  = m_fieldSize-1;
+        indexLimit = 0;
+        break;
+    case Direction::Up:
+        move       = &incr;
+        arithmOper = &summ;
+        compare    = &lsth;
+        access     = &Playground::getNodeColumnConst;
+        indexInit  = 0;
+        indexLimit = m_fieldSize-1;
+        break;
+    case Direction::Down:
+        move       = &decr;
+        arithmOper = &diff;
+        compare    = &grtn;
+        access     = &Playground::getNodeColumnConst;
+        indexInit  = m_fieldSize-1;
+        indexLimit = 0;
+        break;
+    default:
+        break;
+    }
+
+    // todo: optimize
+    for(int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
+    {
+        for(int index = indexInit; compare(index, indexLimit); move(index))
+        {
+            moveRects(indexTop,direction);
+
+            quint16 curValue = (this->*access)(index, indexTop).value();
+            if (!curValue)
                 break;
 
-            if(curValue == m_grid[x][y+1].value())
+            if (curValue == (this->*access)(arithmOper(index, 1), indexTop).value())
             {
-                m_grid[x][y  ].setValue(curValue*2);
-                m_grid[x][y+1].setValue(0);
+                (this->*access)(index               , indexTop).setValue(curValue*2);
+                (this->*access)(arithmOper(index, 1), indexTop).setValue(0);
+                result = true;
             }
         }
     }
@@ -175,85 +222,7 @@ bool Playground::moveRoutineUp()
     return result;
 }
 
-bool Playground::moveRoutineDown()
-{
-    bool result = false;
-
-    // todo: optimize
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        for(int y = m_fieldSize-1; y > 0; --y)
-        {
-            moveRects(x,Direction::Down);
-
-            quint16 curValue = m_grid[x][y].value();
-            if(!curValue)
-                break;
-
-            if(curValue == m_grid[x][y-1].value())
-            {
-                m_grid[x][y  ].setValue(curValue*2);
-                m_grid[x][y-1].setValue(0);
-            }
-        }
-    }
-
-    return result;
-}
-
-bool Playground::moveRoutineRight()
-{
-    bool result = false;
-
-    // todo: optimize
-    for(int y = 0; y < m_fieldSize; ++y)
-    {
-        for(int x = m_fieldSize-1; x > 0; --x)
-        {
-            moveRects(y,Direction::Right);
-
-            quint16 curValue = m_grid[x][y].value();
-            if(!curValue)
-                break;
-
-            if(curValue == m_grid[x-1][y].value())
-            {
-                m_grid[x  ][y].setValue(curValue*2);
-                m_grid[x-1][y].setValue(0);
-            }
-        }
-    }
-
-    return result;
-}
-
-bool Playground::moveRoutineLeft()
-{
-    bool result = false;
-
-    // todo: optimize
-    for(int y = 0; y < m_fieldSize; ++y)
-    {
-        for(int x = 0; x < m_fieldSize-1; ++x)
-        {
-            moveRects(y,Direction::Left);
-
-            quint16 curValue = m_grid[x][y].value();
-            if(!curValue)
-                break;
-
-            if(curValue == m_grid[x+1][y].value())
-            {
-                m_grid[x  ][y].setValue(curValue*2);
-                m_grid[x+1][y].setValue(0);
-            }
-        }
-    }
-
-    return result;
-}
-
-void Playground::moveRects(quint8 indexConst, Playground::Direction direct)
+void Playground::moveRects(quint8 indexConst, Playground::Direction direction)
 {
     Movement   move;
     Arithmetic arithmOper;
@@ -261,68 +230,68 @@ void Playground::moveRects(quint8 indexConst, Playground::Direction direct)
     NodeAccess access;
     NodeMerge  merge;
 
-    int indexTo, indexFirstLimit;
+    int indexTo, indexToLimit;
 
     // todo optimize
-    switch (direct)
+    switch (direction)
     {
     case Direction::Left:
-        move            = &incr;
-        arithmOper      = &summ;
-        compare         = &lsth;
-        access          = &Playground::getNodeRowConst;
-        merge           = &Playground::mergeNodes;
-        indexTo         = 0;
-        indexFirstLimit = m_fieldSize-1;
+        move         = &incr;
+        arithmOper   = &summ;
+        compare      = &lsth;
+        access       = &Playground::getNodeRowConst;
+        merge        = &Playground::moveNode;
+        indexTo      = 0;
+        indexToLimit = m_fieldSize-1;
         break;
     case Direction::Right:
-        move            = &decr;
-        arithmOper      = &diff;
-        compare         = &grtn;
-        access          = &Playground::getNodeRowConst;
-        merge           = &Playground::mergeNodes;
-        indexTo         = m_fieldSize-1;
-        indexFirstLimit = 0;
+        move         = &decr;
+        arithmOper   = &diff;
+        compare      = &grtn;
+        access       = &Playground::getNodeRowConst;
+        merge        = &Playground::moveNode;
+        indexTo      = m_fieldSize-1;
+        indexToLimit = 0;
         break;
     case Direction::Up:
-        move            = &incr;
-        arithmOper      = &summ;
-        compare         = &lsth;
-        access          = &Playground::getNodeColumnConst;
-        merge           = &Playground::mergeNodesInv;
-        indexTo         = 0;
-        indexFirstLimit = m_fieldSize-1;
+        move         = &incr;
+        arithmOper   = &summ;
+        compare      = &lsth;
+        access       = &Playground::getNodeColumnConst;
+        merge        = &Playground::moveNodeInv;
+        indexTo      = 0;
+        indexToLimit = m_fieldSize-1;
         break;
     case Direction::Down:
-        move            = &decr;
-        arithmOper      = &diff;
-        compare         = &grtn;
-        access          = &Playground::getNodeColumnConst;
-        merge           = &Playground::mergeNodesInv;
-        indexTo         = m_fieldSize-1;
-        indexFirstLimit = 0;
+        move         = &decr;
+        arithmOper   = &diff;
+        compare      = &grtn;
+        access       = &Playground::getNodeColumnConst;
+        merge        = &Playground::moveNodeInv;
+        indexTo      = m_fieldSize-1;
+        indexToLimit = 0;
         break;
     default:
         return;
         break;
     }
 
-    for(; compare(indexTo, indexFirstLimit); move(indexTo))
+    for(; compare(indexTo, indexToLimit); move(indexTo))
     {
-        if(!(this->*access)(indexTo,indexConst).value())
+        if (!(this->*access)(indexTo,indexConst).value())
         {
-            int indexFromLimit = arithmOper(indexFirstLimit, 1);
+            int indexFromLimit = arithmOper(indexToLimit, 1);
 
             int indexFrom;
             for(indexFrom = arithmOper(indexTo,1); compare(indexFrom, indexFromLimit); move(indexFrom))
             {
-                if((this->*access)(indexFrom,indexConst).value())
+                if ((this->*access)(indexFrom,indexConst).value())
                 {
                     (this->*merge)(indexFrom,indexConst,indexTo,indexConst);
                     break;
                 }
             }
-            if(indexFrom == indexFromLimit)
+            if (indexFrom == indexFromLimit)
                 break;
         }
     }
@@ -382,7 +351,7 @@ float Playground::rnd01()
 unsigned short Playground::rnd0or1()
 {
     float rndValue = rnd01();
-    if(rndValue < 0.5)
+    if (rndValue < 0.5)
         return 0;
     else
         return 1;
