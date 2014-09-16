@@ -9,9 +9,9 @@
 
 class Playground : public QWidget
 {
-    typedef int& (*Oper      )(int&);
-    typedef int  (*SimpCalc  )(int,int);
-    typedef bool (*Equalation)(int,int);
+    typedef int& (*Movement  )(int&);
+    typedef int  (*Arithmetic)(int,int);
+    typedef bool (*Comparison)(int,int);
     typedef Node&(Playground::* NodeAccess)(int,int);
     typedef void (Playground::* NodeMerge )(int,int,int,int);
 

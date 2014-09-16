@@ -255,51 +255,51 @@ bool Playground::moveRoutineLeft()
 
 void Playground::moveRects(quint8 indexConst, Playground::Direction direct)
 {
-    Oper     oper;
-    SimpCalc simpCalc;
-    Equalation equal;
+    Movement   move;
+    Arithmetic arithmOper;
+    Comparison compare;
     NodeAccess access;
     NodeMerge  merge;
 
-    int indexFirst, indexFirstLimit;
+    int indexTo, indexFirstLimit;
 
     // todo optimize
     switch (direct)
     {
     case Direction::Left:
-        oper            = &incr;
-        simpCalc        = &summ;
-        equal           = &lsth;
+        move            = &incr;
+        arithmOper      = &summ;
+        compare         = &lsth;
         access          = &Playground::getNodeRowConst;
         merge           = &Playground::mergeNodes;
-        indexFirst      = 0;
+        indexTo         = 0;
         indexFirstLimit = m_fieldSize-1;
         break;
     case Direction::Right:
-        oper            = &decr;
-        simpCalc        = &diff;
-        equal           = &grtn;
+        move            = &decr;
+        arithmOper      = &diff;
+        compare         = &grtn;
         access          = &Playground::getNodeRowConst;
         merge           = &Playground::mergeNodes;
-        indexFirst      = m_fieldSize-1;
+        indexTo         = m_fieldSize-1;
         indexFirstLimit = 0;
         break;
     case Direction::Up:
-        oper            = &incr;
-        simpCalc        = &summ;
-        equal           = &lsth;
+        move            = &incr;
+        arithmOper      = &summ;
+        compare         = &lsth;
         access          = &Playground::getNodeColumnConst;
         merge           = &Playground::mergeNodesInv;
-        indexFirst      = 0;
+        indexTo         = 0;
         indexFirstLimit = m_fieldSize-1;
         break;
     case Direction::Down:
-        oper            = &decr;
-        simpCalc        = &diff;
-        equal           = &grtn;
+        move            = &decr;
+        arithmOper      = &diff;
+        compare         = &grtn;
         access          = &Playground::getNodeColumnConst;
         merge           = &Playground::mergeNodesInv;
-        indexFirst      = m_fieldSize-1;
+        indexTo         = m_fieldSize-1;
         indexFirstLimit = 0;
         break;
     default:
@@ -307,20 +307,22 @@ void Playground::moveRects(quint8 indexConst, Playground::Direction direct)
         break;
     }
 
-    for(; equal(indexFirst, indexFirstLimit); oper(indexFirst))
+    for(; compare(indexTo, indexFirstLimit); move(indexTo))
     {
-        if(!(this->*access)(indexFirst,indexConst).value())
+        if(!(this->*access)(indexTo,indexConst).value())
         {
-            int indexFwd;
-            for(indexFwd = simpCalc(indexFirst,1); equal(indexFwd, simpCalc(indexFirstLimit,1)); oper(indexFwd))
+            int indexFromLimit = arithmOper(indexFirstLimit, 1);
+
+            int indexFrom;
+            for(indexFrom = arithmOper(indexTo,1); compare(indexFrom, indexFromLimit); move(indexFrom))
             {
-                if((this->*access)(indexFwd,indexConst).value())
+                if((this->*access)(indexFrom,indexConst).value())
                 {
-                    (this->*merge)(indexFwd,indexConst,indexFirst,indexConst);
+                    (this->*merge)(indexFrom,indexConst,indexTo,indexConst);
                     break;
                 }
             }
-            if(indexFwd == m_fieldSize)
+            if(indexFrom == indexFromLimit)
                 break;
         }
     }
