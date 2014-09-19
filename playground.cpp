@@ -135,11 +135,15 @@ quint8 Playground::fieldSize() const
 
 void Playground::setFieldSize(quint8 size)
 {
+    if (size == m_fieldSize)
+        return;
+
     clearGrid();
 
     m_fieldSize = size;
 
     initGrid();
+    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
 }
 
 void Playground::keyPress(Playground::Direction direction)
