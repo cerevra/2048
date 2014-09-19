@@ -20,10 +20,14 @@ class Playground : public QWidget
     Q_OBJECT
 public:
     explicit Playground(QWidget *parent = 0);
+    ~Playground();
     QSize    sizeHint  () const;
+
+    void resetGrid     ();
 
 signals:
     void needToRepaint ();
+    void gameOver      ();
 
 public slots:
 
@@ -35,8 +39,10 @@ protected:
 
 private:
     void initGrid        ();
-    void generateNewNode ();
-    bool isGameOver      ();
+
+    void keyPress        (Direction direction);
+    bool generateNewNode ();
+    void checkForGameOver();
 
     void moveNode        (int xFrom, int yFrom, int xTo, int yTo);
     void moveNodeInv     (int xFrom, int yFrom, int xTo, int yTo);
@@ -60,7 +66,7 @@ private:
     float rnd01           ();
     unsigned short rnd0or1();
 
-    static const quint8 m_fieldSize = 4;
+    static const quint8 m_fieldSize = 2;
     static const QColor m_backroundColor;
 
     int             m_rectSize;

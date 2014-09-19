@@ -2,6 +2,7 @@
 #include <QLayout>
 #include <QKeyEvent>
 #include <QAction>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -27,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_actionClose->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_W));
     m_actionClose->activate   (QAction::Trigger);
     connect(m_actionClose,SIGNAL(triggered()),this,SLOT(close()));
+
+    connect(m_playground,SIGNAL(gameOver()),this,SLOT(gameIsOver()));
 }
 
 MainWindow::~MainWindow()
@@ -62,4 +65,11 @@ void MainWindow::resizeEvent(QResizeEvent *event)
               size.height()-(m_topMargin+m_botMargin)));
 
     QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::gameIsOver()
+{
+    QMessageBox::information(this, QString("Game is over!"), QString());
+
+    m_playground->resetGrid();
 }

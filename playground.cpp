@@ -22,6 +22,17 @@ Playground::Playground(QWidget *parent)
     generateNewNode();
 }
 
+Playground::~Playground()
+{
+    disconnect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
+
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        free(m_grid[x]);
+    }
+    free(m_grid);
+}
+
 QSize Playground::sizeHint() const
 {
     return QSize(m_rectSize,m_rectSize);
@@ -30,11 +41,10 @@ QSize Playground::sizeHint() const
 void Playground::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event)
-    // background
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-//    painter.translate(-100,10);
     for(int x = 0; x < m_fieldSize; ++x)
     {
         for(int y = 0; y < m_fieldSize; ++y)
@@ -42,21 +52,17 @@ void Playground::paintEvent(QPaintEvent *event)
             QRect currentRect(x*(m_rectSize + m_rectMargin),y*(m_rectSize + m_rectMargin),
                                  m_rectSize,m_rectSize);
             const Node& node = m_grid[x][y];
+
+            painter.setPen  (node.color());
+            painter.setBrush(node.color());
+            painter.drawRoundedRect(currentRect,m_rectMargin,m_rectMargin);
+
             if (node.value())
             {
-                painter.setPen  (node.color());
-                painter.setBrush(node.color());
-                painter.drawRoundedRect(currentRect,m_rectMargin,m_rectMargin);
                 painter.setPen  (m_backroundColor);
                 painter.drawText(x*(m_rectSize + m_rectMargin)+20,
                                  y*(m_rectSize + m_rectMargin)+20,
                                  QVariant(node.value()).toString());
-            }
-            else
-            {
-                painter.setBrush(m_backroundColor);
-                painter.setPen  (m_backroundColor);
-                painter.drawRoundedRect(currentRect,m_rectMargin,m_rectMargin);
             }
         }
     }
@@ -67,28 +73,16 @@ void Playground::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Left:
-        if (moveRoutine(Direction::Left))
-            generateNewNode();
-
-        isGameOver();
+        keyPress(Direction::Left);
         break;
     case Qt::Key_Right:
-        if (moveRoutine(Direction::Right))
-            generateNewNode();
-
-        isGameOver();
+        keyPress(Direction::Right);
         break;
     case Qt::Key_Down:
-        if (moveRoutine(Direction::Down))
-            generateNewNode();
-
-        isGameOver();
+        keyPress(Direction::Down);
         break;
     case Qt::Key_Up:
-        if (moveRoutine(Direction::Up))
-            generateNewNode();
-
-        isGameOver();
+        keyPress(Direction::Up);
         break;
     default:
         break;
@@ -117,7 +111,24 @@ void Playground::initGrid()
     }
 }
 
-void Playground::generateNewNode()
+void Playground::resetGrid()
+{
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize; ++y)
+            m_grid[x][y].setValue(0);
+    }
+    generateNewNode();
+}
+
+void Playground::keyPress(Playground::Direction direction)
+{
+    if (moveRoutine(direction))
+        if (!generateNewNode())
+            checkForGameOver();
+}
+
+bool Playground::generateNewNode()
 {
     QVector<QPoint> vacantPlaces;
     vacantPlaces.reserve(m_fieldSize*m_fieldSize);
@@ -134,12 +145,31 @@ void Playground::generateNewNode()
 
     m_grid[point.x()][point.y()].setValue(2*int(1+rnd0or1()));
     emit needToRepaint();
+
+    return vacantPlaces.size() - 1;
 }
 
-bool Playground::isGameOver()
+void Playground::checkForGameOver()
 {
-    // todo
-    return false;
+    for (int x = 0; x < m_fieldSize; ++x)
+    {
+        for (int y = 0; y < m_fieldSize - 1; ++y)
+        {
+            if (m_grid[x][y].value() == m_grid[x][y+1].value())
+                return;
+        }
+    }
+
+    for (int y = 0; y < m_fieldSize; ++y)
+    {
+        for (int x = 0; x < m_fieldSize - 1; ++x)
+        {
+            if (m_grid[x][y].value() == m_grid[x+1][y].value())
+                return;
+        }
+    }
+
+    emit gameOver();
 }
 
 void Playground::moveNode(int xFrom, int yFrom, int xTo, int yTo)

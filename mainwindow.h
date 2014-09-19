@@ -24,6 +24,7 @@ protected:
     void resizeEvent(QResizeEvent *event              );
 
 public slots:
+    void gameIsOver ();
 
 private:
     Ui::MainWindow *ui;
