@@ -19,7 +19,7 @@ quint16 Node::value() const
 void Node::setValue(const quint16 &value)
 {
     m_value = value;
-    m_color = m_colors[log2(value)];
+    m_color = m_colors[qRound(log2(value))];
 }
 
 const QColor& Node::color() const

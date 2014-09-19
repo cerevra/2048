@@ -9,13 +9,15 @@ class ColorHandler
 public:
     ColorHandler()
     {
-        // todo correct colors
-        m_colors.push_back(QColor(176,196,222));// background
-        m_colors.push_back(QColor("green"));
-        m_colors.push_back(QColor("darkred"));
-        m_colors.push_back(QColor("darkgreen"));
-        m_colors.push_back(QColor("gray"));
-        m_colors.push_back(QColor("darkgray"));
+        m_colors.push_back(QColor(176, 196, 222));// background
+        m_colors.push_back(QColor(162, 162, 109));
+        m_colors.push_back(QColor(158, 144, 105));
+        m_colors.push_back(QColor(139, 139, 94 ));
+        m_colors.push_back(QColor(128, 155, 115));
+        m_colors.push_back(QColor(180, 141, 169));
+        m_colors.push_back(QColor(196, 129, 177));
+        m_colors.push_back(QColor(191, 100, 166));
+        m_colors.push_back(QColor(134, 56 , 112));
     }
 
     const QColor& operator[](quint16 index) const
