@@ -43,7 +43,7 @@ private:
 
     bool moveRoutine     (Direction direction);
 
-    void moveRects       (quint8 indexConst, Direction direction);
+    bool moveRects       (quint8 indexConst, Direction direction);
 
     void setRectSize     (int rectSize);
 

@@ -67,24 +67,28 @@ void Playground::keyPressEvent(QKeyEvent *event)
     switch(event->key())
     {
     case Qt::Key_Left:
-        moveRoutine(Direction::Left);
+        if (moveRoutine(Direction::Left))
+            generateNewNode();
+
         isGameOver();
-        generateNewNode();
         break;
     case Qt::Key_Right:
-        moveRoutine(Direction::Right);
+        if (moveRoutine(Direction::Right))
+            generateNewNode();
+
         isGameOver();
-        generateNewNode();
         break;
     case Qt::Key_Down:
-        moveRoutine(Direction::Down);
+        if (moveRoutine(Direction::Down))
+            generateNewNode();
+
         isGameOver();
-        generateNewNode();
         break;
     case Qt::Key_Up:
-        moveRoutine(Direction::Up);
+        if (moveRoutine(Direction::Up))
+            generateNewNode();
+
         isGameOver();
-        generateNewNode();
         break;
     default:
         break;
@@ -204,7 +208,9 @@ bool Playground::moveRoutine(Playground::Direction direction)
     {
         for(int index = indexInit; compare(index, indexLimit); move(index))
         {
-            moveRects(indexTop,direction);
+            bool moveResult = moveRects(indexTop,direction);
+            if (!result)
+                result = moveResult;
 
             quint16 curValue = (this->*access)(index, indexTop).value();
             if (!curValue)
@@ -222,8 +228,10 @@ bool Playground::moveRoutine(Playground::Direction direction)
     return result;
 }
 
-void Playground::moveRects(quint8 indexConst, Playground::Direction direction)
+bool Playground::moveRects(quint8 indexConst, Playground::Direction direction)
 {
+    bool result = false;
+
     Movement   move;
     Arithmetic arithmOper;
     Comparison compare;
@@ -272,7 +280,7 @@ void Playground::moveRects(quint8 indexConst, Playground::Direction direction)
         indexToLimit = 0;
         break;
     default:
-        return;
+        return false;
         break;
     }
 
@@ -288,6 +296,7 @@ void Playground::moveRects(quint8 indexConst, Playground::Direction direction)
                 if ((this->*access)(indexFrom,indexConst).value())
                 {
                     (this->*merge)(indexFrom,indexConst,indexTo,indexConst);
+                    result = true;
                     break;
                 }
             }
@@ -295,6 +304,8 @@ void Playground::moveRects(quint8 indexConst, Playground::Direction direction)
                 break;
         }
     }
+
+    return result;
 }
 
 void Playground::setRectSize(int rectSize)
