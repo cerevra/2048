@@ -40,24 +40,36 @@ void Playground::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
+    int rectInterval  = m_rectSize + m_rectMargin;
+
+    QFont font       = this->font();
+    font.setPointSizeF(m_rectSize/3);
+    int   fontHiegth = font.pointSize();
+    int digitY = (m_rectSize + fontHiegth)*0.5;
+
+    QFontMetrics fontMetrics(font);
+
     for(int x = 0; x < m_fieldSize; ++x)
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-            QRect currentRect(x*(m_rectSize + m_rectMargin),y*(m_rectSize + m_rectMargin),
-                                 m_rectSize,m_rectSize);
+
+            QRect currentRect(x*rectInterval,y*rectInterval,
+                                 m_rectSize ,m_rectSize);
             const Node& node = m_grid[x][y];
 
             painter.setPen  (node.color());
             painter.setBrush(node.color());
-            painter.drawRoundedRect(currentRect,m_rectMargin,m_rectMargin);
+            painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
 
             if (node.value())
             {
+                QString valueStr  = QVariant(node.value()).toString();
                 painter.setPen  (m_backroundColor);
-                painter.drawText(x*(m_rectSize + m_rectMargin)+20,
-                                 y*(m_rectSize + m_rectMargin)+20,
-                                 QVariant(node.value()).toString());
+                painter.setFont (font);
+                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5,
+                                 y*rectInterval + digitY,
+                                 valueStr);
             }
         }
     }
