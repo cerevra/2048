@@ -5,6 +5,8 @@
 #include <QGridLayout>
 
 #include "about.h"
+#include "settings.h"
+
 #include "playground.h"
 
 namespace Ui {
@@ -25,7 +27,10 @@ protected:
     void resizeEvent(QResizeEvent *event              );
 
 public slots:
-    void gameIsOver ();
+    void gameIsOver  ();
+
+protected slots:
+    void transmitFieldSize();
 
 private:
     Ui::MainWindow *ui;
@@ -38,7 +43,8 @@ private:
     Playground * m_playground;
     QAction    * m_actionClose;
 
-    About      * m_formAbout;
+    About      * m_dialogAbout;
+    Settings   * m_dialogSettings;
 };
 
 #endif // MAINWINDOW_H
