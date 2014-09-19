@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
     , m_gridLayout (new QGridLayout(this))
     , m_playground (new Playground (this))
     , m_actionClose(new QAction    (this))
+    , m_formAbout  (new About      (this))
 {
     ui->setupUi(this);
-
 
     m_gridLayout->addWidget         (m_playground);
     m_playground->installEventFilter(this        );
@@ -29,7 +29,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_actionClose->activate   (QAction::Trigger);
     connect(m_actionClose,SIGNAL(triggered()),this,SLOT(close()));
 
-    connect(m_playground,SIGNAL(gameOver()),this,SLOT(gameIsOver()));
+    connect(m_playground ,SIGNAL(gameOver ()),this,SLOT(gameIsOver()));
+
+    connect(ui->actionAbout,SIGNAL(triggered()),m_formAbout,SLOT(showNormal()));
 }
 
 MainWindow::~MainWindow()

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGridLayout>
 
+#include "about.h"
 #include "playground.h"
 
 namespace Ui {
@@ -36,6 +37,8 @@ private:
     QGridLayout* m_gridLayout;
     Playground * m_playground;
     QAction    * m_actionClose;
+
+    About      * m_formAbout;
 };
 
 #endif // MAINWINDOW_H
