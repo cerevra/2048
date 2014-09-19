@@ -9,7 +9,8 @@
 const QColor Playground::m_backroundColor = QColor(176,196,222);
 
 Playground::Playground(QWidget *parent)
-    : QWidget(parent)
+    : QWidget    (parent)
+    , m_fieldSize(4     )
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
@@ -18,19 +19,13 @@ Playground::Playground(QWidget *parent)
 
     connect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
     initGrid();
-
-    generateNewNode();
 }
 
 Playground::~Playground()
 {
     disconnect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
 
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        free(m_grid[x]);
-    }
-    free(m_grid);
+    clearGrid();
 }
 
 QSize Playground::sizeHint() const
@@ -109,6 +104,17 @@ void Playground::initGrid()
         for(int y = 0; y < m_fieldSize; ++y)
             m_grid[x][y].setValue(0);
     }
+
+    generateNewNode();
+}
+
+void Playground::clearGrid()
+{
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        free(m_grid[x]);
+    }
+    free(m_grid);
 }
 
 void Playground::resetGrid()
@@ -118,7 +124,22 @@ void Playground::resetGrid()
         for(int y = 0; y < m_fieldSize; ++y)
             m_grid[x][y].setValue(0);
     }
+
     generateNewNode();
+}
+
+quint8 Playground::fieldSize() const
+{
+    return m_fieldSize;
+}
+
+void Playground::setFieldSize(quint8 size)
+{
+    clearGrid();
+
+    m_fieldSize = size;
+
+    initGrid();
 }
 
 void Playground::keyPress(Playground::Direction direction)
