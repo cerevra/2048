@@ -10,7 +10,7 @@ public:
     ColorHandler()
     {
         // todo correct colors
-        m_colors.push_back(QColor("red"));
+        m_colors.push_back(QColor(176,196,222));// background
         m_colors.push_back(QColor("green"));
         m_colors.push_back(QColor("darkred"));
         m_colors.push_back(QColor("darkgreen"));
@@ -20,6 +20,14 @@ public:
 
     const QColor& operator[](quint16 index) const
     {
+        while (index >= m_colors.size())
+        {
+            index -= m_colors.size();
+
+            if (!index)
+                ++index;
+        }
+
         return m_colors[index];
     }
 
