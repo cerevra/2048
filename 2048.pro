@@ -15,12 +15,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     playground.cpp \
-    node.cpp
+    node.cpp \
+    about.cpp \
+    settings.cpp
 
 HEADERS  += mainwindow.h \
     playground.h \
-    node.h
+    node.h \
+    about.h \
+    settings.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    about.ui \
+    settings.ui
 
 QMAKE_CXXFLAGS += -std=c++0x
