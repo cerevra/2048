@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QGridLayout>
 
+#include "about.h"
+#include "settings.h"
+
 #include "playground.h"
 
 namespace Ui {
@@ -24,7 +27,13 @@ protected:
     void resizeEvent(QResizeEvent *event              );
 
 public slots:
-    void gameIsOver ();
+    void gameIsOver       ();
+
+    void setMaximumNode   (int max);
+    void setTotalScore    (int total);
+
+protected slots:
+    void transmitFieldSize();
 
 private:
     Ui::MainWindow *ui;
@@ -36,6 +45,11 @@ private:
     QGridLayout* m_gridLayout;
     Playground * m_playground;
     QAction    * m_actionClose;
+
+    About      * m_dialogAbout;
+    Settings   * m_dialogSettings;
+
+    int          m_highestScore;
 };
 
 #endif // MAINWINDOW_H
