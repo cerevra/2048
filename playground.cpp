@@ -9,8 +9,10 @@
 const QColor Playground::m_backroundColor = QColor(176,196,222);
 
 Playground::Playground(QWidget *parent)
-    : QWidget    (parent)
-    , m_fieldSize(4     )
+    : QWidget      (parent)
+    , m_fieldSize  (4     )
+    , m_maximumNode(0     )
+    , m_totalScore (0     )
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
@@ -137,12 +139,25 @@ void Playground::resetGrid()
             m_grid[x][y].setValue(0);
     }
 
+    m_maximumNode = 0;
+    m_totalScore  = 0;
+
     generateNewNode();
 }
 
 quint8 Playground::fieldSize() const
 {
     return m_fieldSize;
+}
+
+quint16 Playground::getMaxNode() const
+{
+    return m_maximumNode;
+}
+
+quint16 Playground::getTotalScr() const
+{
+    return m_totalScore;
 }
 
 void Playground::setFieldSize(quint8 size)
@@ -152,7 +167,10 @@ void Playground::setFieldSize(quint8 size)
 
     clearGrid();
 
-    m_fieldSize = size;
+    m_fieldSize   = size;
+
+    m_maximumNode = 0;
+    m_totalScore  = 0;
 
     initGrid();
     resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
@@ -168,7 +186,8 @@ void Playground::keyPress(Playground::Direction direction)
 bool Playground::generateNewNode()
 {
     QVector<QPoint> vacantPlaces;
-    vacantPlaces.reserve(m_fieldSize*m_fieldSize);
+    int maxCount = m_fieldSize*m_fieldSize;
+    vacantPlaces.reserve(maxCount);
 
     for(int x = 0; x < m_fieldSize; ++x)
     {
@@ -180,8 +199,19 @@ bool Playground::generateNewNode()
     }
     const QPoint& point = vacantPlaces.at(vacantPlaces.size()*rnd01());
 
-    m_grid[point.x()][point.y()].setValue(2*int(1+rnd0or1()));
+    quint16 value = 2*int(1+rnd0or1());
+
+    m_grid[point.x()][point.y()].setValue(value);
     emit needToRepaint();
+
+    m_totalScore += value;
+    emit totalScore(m_totalScore);
+
+    if (value > m_maximumNode)
+    {
+        m_maximumNode = value;
+        emit maximumNode(value);
+    }
 
     return vacantPlaces.size() - 1;
 }
@@ -285,9 +315,16 @@ bool Playground::moveRoutine(Playground::Direction direction)
 
             if (curValue == (this->*access)(arithmOper(index, 1), indexTop).value())
             {
-                (this->*access)(index               , indexTop).setValue(curValue*2);
+                quint16 newValue = curValue*2;
+                (this->*access)(index               , indexTop).setValue(newValue);
                 (this->*access)(arithmOper(index, 1), indexTop).setValue(0);
                 result = true;
+
+                if (newValue > m_maximumNode)
+                {
+                    m_maximumNode = newValue;
+                    emit maximumNode(m_maximumNode);
+                }
             }
         }
     }

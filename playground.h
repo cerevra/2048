@@ -26,12 +26,18 @@ public:
     void   resetGrid   ();
     quint8 fieldSize   () const;
 
+    quint16 getMaxNode () const;
+    quint16 getTotalScr() const;
+
 signals:
     void needToRepaint ();
     void gameOver      ();
 
+    void maximumNode   (int max);
+    void totalScore    (int total);
+
 public slots:
-    void   setFieldSize(quint8 size);
+    void setFieldSize  (quint8 size);
 
 protected:
     void paintEvent    (QPaintEvent  *event);
@@ -75,6 +81,10 @@ private:
     qreal  m_rectMargin;
 
     Node** m_grid;
+
+    // statictics
+    int    m_maximumNode;
+    int    m_totalScore;
 };
 
 #endif // PLAYGROUND_H

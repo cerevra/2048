@@ -27,7 +27,10 @@ protected:
     void resizeEvent(QResizeEvent *event              );
 
 public slots:
-    void gameIsOver  ();
+    void gameIsOver       ();
+
+    void setMaximumNode   (int max);
+    void setTotalScore    (int total);
 
 protected slots:
     void transmitFieldSize();
@@ -45,6 +48,8 @@ private:
 
     About      * m_dialogAbout;
     Settings   * m_dialogSettings;
+
+    int          m_highestScore;
 };
 
 #endif // MAINWINDOW_H
