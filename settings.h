@@ -18,13 +18,16 @@ public:
     void setFieldSize(quint8 size);
 
 protected slots:
-    void okPressed   ();
+    void okPressed    ();
+    void cancelPressed();
 
 signals:
     void fieldSize   (quint8 size);
 
 private:
     Ui::Settings *ui;
+
+    quint8 m_size;
 };
 
 #endif // SETTINGS_H

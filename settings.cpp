@@ -3,12 +3,14 @@
 
 Settings::Settings(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::Settings)
+    ui     (new Ui::Settings),
+    m_size (0)
 {
     ui->setupUi(this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okPressed()));
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okPressed    ()));
+    connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelPressed()));
 }
 
 Settings::~Settings()
@@ -18,10 +20,17 @@ Settings::~Settings()
 
 void Settings::setFieldSize(quint8 size)
 {
-    ui->spinBox->setValue(size);
+    m_size = size;
+    ui->spinBox->setValue(m_size);
 }
 
 void Settings::okPressed()
 {
-    emit fieldSize(ui->spinBox->value());
+    m_size = ui->spinBox->value();
+    emit fieldSize(m_size);
+}
+
+void Settings::cancelPressed()
+{
+    ui->spinBox->setValue(m_size);
 }
