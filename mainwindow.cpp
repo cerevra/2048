@@ -109,7 +109,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::gameIsOver()
 {
-    QMessageBox::information(this, QString("Game is over!"), QString());
+    QMessageBox::information(this, QString("Game is over!"), QString("Next time, bro..."));
 
     m_playground->resetGrid();
 }
