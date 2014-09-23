@@ -11,6 +11,8 @@ const QColor Playground::m_backroundColor = QColor(176,196,222);
 Playground::Playground(QWidget *parent)
     : QWidget      (parent)
     , m_fieldSize  (4     )
+    , m_xOffset    (0     )
+    , m_yOffset    (0     )
     , m_maximumNode(0     )
     , m_totalScore (0     )
 {
@@ -47,7 +49,7 @@ void Playground::paintEvent(QPaintEvent *event)
     QFont font       = this->font();
     font.setPointSizeF(m_rectSize/3);
     int   fontHiegth = font.pointSize();
-    int digitY = (m_rectSize + fontHiegth)*0.5;
+    int   digitY     = (m_rectSize + fontHiegth)*0.5;
 
     QFontMetrics fontMetrics(font);
 
@@ -56,7 +58,7 @@ void Playground::paintEvent(QPaintEvent *event)
         for(int y = 0; y < m_fieldSize; ++y)
         {
 
-            QRect currentRect(x*rectInterval,y*rectInterval,
+            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
             const Node& node = m_grid[x][y];
 
@@ -69,8 +71,8 @@ void Playground::paintEvent(QPaintEvent *event)
                 QString valueStr  = QVariant(node.value()).toString();
                 painter.setPen  (m_backroundColor);
                 painter.setFont (font);
-                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5,
-                                 y*rectInterval + digitY,
+                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
+                                 y*rectInterval + digitY + m_yOffset,
                                  valueStr);
             }
         }
@@ -100,9 +102,21 @@ void Playground::keyPressEvent(QKeyEvent *event)
 
 void Playground::resizeEvent(QResizeEvent *event)
 {
-    QSize newSize = event->size   ();
-    int   minimum = newSize.height() < newSize.width() ? newSize.height()
-                                                       : newSize.width ();
+    QSize newSize = event->size();
+    int newHeigth = newSize.height();
+    int newWidth  = newSize.width ();
+
+    int minimum;
+    if (newHeigth < newWidth)
+    {
+        minimum   =  newHeigth;
+        m_xOffset = (newWidth  - minimum)/2;
+    }
+    else
+    {
+        minimum   =  newWidth;
+        m_yOffset = (newHeigth - minimum)/2;
+    }
 
     setRectSize(minimum*5/(m_fieldSize*6));
 

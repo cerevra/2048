@@ -80,6 +80,9 @@ private:
     int    m_rectSize;
     qreal  m_rectMargin;
 
+    int    m_xOffset;
+    int    m_yOffset;
+
     Node** m_grid;
 
     // statictics
