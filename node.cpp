@@ -3,7 +3,7 @@
 
 #include "node.h"
 
-const ColorHandler Node::m_colors = ColorHandler();
+const Node::ColorHandler Node::m_colors = ColorHandler();
 
 Node::Node(quint16 value, QObject *parent)
     : QObject(parent)
