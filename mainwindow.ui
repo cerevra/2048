@@ -19,6 +19,7 @@
   <property name="font">
    <font>
     <family>Arial</family>
+    <pointsize>12</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -29,9 +30,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -46,8 +47,8 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>71</width>
-      <height>16</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -58,9 +59,9 @@
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
    </widget>
@@ -69,8 +70,8 @@
      <rect>
       <x>150</x>
       <y>10</y>
-      <width>81</width>
-      <height>16</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -81,9 +82,9 @@
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
    </widget>
@@ -92,8 +93,8 @@
      <rect>
       <x>280</x>
       <y>10</y>
-      <width>61</width>
-      <height>16</height>
+      <width>81</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -107,7 +108,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
