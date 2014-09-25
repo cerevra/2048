@@ -13,7 +13,7 @@ class Playground : public QWidget
     typedef int  (*Arithmetic)             (int,int);
     typedef bool (*Comparison)             (int,int);
     typedef Node&(Playground::* NodeAccess)(int,int);
-    typedef void (Playground::* NodeMerge )(int,int,int,int);
+    typedef void (Playground::* NodeMove  )(int,int,int,int);
 
     enum class Direction {Up, Down, Right, Left};
 
@@ -55,9 +55,7 @@ private:
     void moveNode        (int xFrom, int yFrom, int xTo, int yTo);
     void moveNodeInv     (int xFrom, int yFrom, int xTo, int yTo);
 
-    bool moveRoutine     (Direction direction);
-
-    bool moveRects       (quint8 indexConst, Direction direction);
+    bool moveRoutine         (Direction direction);
 
     void setRectSize     (int rectSize);
 

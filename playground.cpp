@@ -264,14 +264,13 @@ void Playground::moveNodeInv(int xFrom, int yFrom, int xTo, int yTo)
     moveNode(yFrom, xFrom, yTo, xTo);
 }
 
-bool Playground::moveRoutine(Playground::Direction direction)
+bool Playground::moveRoutine(Direction direction)
 {
-    bool result = false;
-
-    Movement   move;
+    Movement   moveIndex;
     Arithmetic arithmOper;
     Comparison compare;
     NodeAccess access;
+    NodeMove   move;
 
     int indexInit, indexLimit;
 
@@ -279,150 +278,102 @@ bool Playground::moveRoutine(Playground::Direction direction)
     switch (direction)
     {
     case Direction::Left:
-        move       = &incr;
+        moveIndex  = &incr;
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeRowConst;
+        move       = &Playground::moveNode;
         indexInit  = 0;
-        indexLimit = m_fieldSize-1;
+        indexLimit = m_fieldSize;
         break;
     case Direction::Right:
-        move       = &decr;
+        moveIndex  = &decr;
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeRowConst;
+        move       = &Playground::moveNode;
         indexInit  = m_fieldSize-1;
-        indexLimit = 0;
+        indexLimit = -1;
         break;
     case Direction::Up:
-        move       = &incr;
+        moveIndex  = &incr;
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeColumnConst;
+        move       = &Playground::moveNodeInv;
         indexInit  = 0;
-        indexLimit = m_fieldSize-1;
+        indexLimit = m_fieldSize;
         break;
     case Direction::Down:
-        move       = &decr;
+        moveIndex  = &decr;
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeColumnConst;
+        move       = &Playground::moveNodeInv;
         indexInit  = m_fieldSize-1;
-        indexLimit = 0;
+        indexLimit = -1;
         break;
     default:
         break;
     }
 
-    // todo: optimize
-    for(int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
-    {
-        for(int index = indexInit; compare(index, indexLimit); move(index))
-        {
-            bool moveResult = moveRects(indexTop,direction);
-            if (!result)
-                result = moveResult;
-
-            quint16 curValue = (this->*access)(index, indexTop).value();
-            if (!curValue)
-                break;
-
-            if (curValue == (this->*access)(arithmOper(index, 1), indexTop).value())
-            {
-                quint16 newValue = curValue*2;
-                (this->*access)(index               , indexTop).setValue(newValue);
-                (this->*access)(arithmOper(index, 1), indexTop).setValue(0);
-                result = true;
-
-                if (newValue > m_maximumNode)
-                {
-                    m_maximumNode = newValue;
-                    emit maximumNode(m_maximumNode);
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-bool Playground::moveRects(quint8 indexConst, Playground::Direction direction)
-{
     bool result = false;
 
-    Movement   move;
-    Arithmetic arithmOper;
-    Comparison compare;
-    NodeAccess access;
-    NodeMerge  merge;
-
-    int indexTo, indexToLimit;
-
-    // todo optimize
-    switch (direction)
+    for (int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
     {
-    case Direction::Left:
-        move         = &incr;
-        arithmOper   = &summ;
-        compare      = &lsth;
-        access       = &Playground::getNodeRowConst;
-        merge        = &Playground::moveNode;
-        indexTo      = 0;
-        indexToLimit = m_fieldSize-1;
-        break;
-    case Direction::Right:
-        move         = &decr;
-        arithmOper   = &diff;
-        compare      = &grtn;
-        access       = &Playground::getNodeRowConst;
-        merge        = &Playground::moveNode;
-        indexTo      = m_fieldSize-1;
-        indexToLimit = 0;
-        break;
-    case Direction::Up:
-        move         = &incr;
-        arithmOper   = &summ;
-        compare      = &lsth;
-        access       = &Playground::getNodeColumnConst;
-        merge        = &Playground::moveNodeInv;
-        indexTo      = 0;
-        indexToLimit = m_fieldSize-1;
-        break;
-    case Direction::Down:
-        move         = &decr;
-        arithmOper   = &diff;
-        compare      = &grtn;
-        access       = &Playground::getNodeColumnConst;
-        merge        = &Playground::moveNodeInv;
-        indexTo      = m_fieldSize-1;
-        indexToLimit = 0;
-        break;
-    default:
-        return false;
-        break;
-    }
-
-    for(; compare(indexTo, indexToLimit); move(indexTo))
-    {
-        if (!(this->*access)(indexTo,indexConst).value())
+        int posTo = -1;
+        for (int index = indexInit; compare(index, indexLimit); moveIndex(index))
         {
-            int indexFromLimit = arithmOper(indexToLimit, 1);
-
-            int indexFrom;
-            for(indexFrom = arithmOper(indexTo,1); compare(indexFrom, indexFromLimit); move(indexFrom))
+            if (!(this->*access)(index, indexTop).value())
             {
-                if ((this->*access)(indexFrom,indexConst).value())
-                {
-                    (this->*merge)(indexFrom,indexConst,indexTo,indexConst);
-                    result = true;
-                    break;
-                }
+                if (posTo < 0)
+                    posTo = index;
+                continue;
             }
-            if (indexFrom == indexFromLimit)
+
+            if (posTo < 0)
+                posTo = index;
+            else
+            {
+                (this->*move)(index, indexTop, posTo, indexTop);
+                result = true;
+            }
+
+            for (int indexNext = arithmOper(index, 1); compare(indexNext, indexLimit); moveIndex(indexNext))
+            {
+                if (!(this->*access)(indexNext, indexTop).value())
+                    continue;
+
+                quint16 curValue = (this->*access)(indexNext, indexTop).value();
+                if (curValue == (this->*access)(posTo, indexTop).value())
+                {
+                    quint16 newValue = curValue*2;
+                    (this->*access)(posTo    , indexTop).setValue(newValue);
+                    (this->*access)(indexNext, indexTop).setValue(0);
+                    result = true;
+
+                    if (newValue > m_maximumNode)
+                    {
+                        m_maximumNode = newValue;
+                        emit maximumNode(m_maximumNode);
+                    }
+                }
+                else
+                {
+                    int posToNear = arithmOper(posTo, 1);
+                    if (indexNext != posToNear)
+                    {
+                        (this->*move)(indexNext, indexTop, posToNear, indexTop);
+                        result = true;
+                    }
+                }
+
+                posTo = -1;
                 break;
+            }
         }
     }
-
+    emit needToRepaint();
     return result;
 }
 
