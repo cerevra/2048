@@ -12,8 +12,7 @@ class Playground : public QWidget
     typedef int& (*Movement  )             (int&);
     typedef int  (*Arithmetic)             (int,int);
     typedef bool (*Comparison)             (int,int);
-    typedef Node&(Playground::* NodeAccess)(int,int);
-    typedef void (Playground::* NodeMove  )(int,int,int,int);
+    typedef Node**(Playground::* NodeAccess)(int,int);
 
     enum class Direction {Up, Down, Right, Left};
 
@@ -52,9 +51,6 @@ private:
     bool generateNewNode ();
     void checkForGameOver();
 
-    void moveNode        (int xFrom, int yFrom, int xTo, int yTo);
-    void moveNodeInv     (int xFrom, int yFrom, int xTo, int yTo);
-
     bool moveRoutine         (Direction direction);
 
     void setRectSize     (int rectSize);
@@ -65,8 +61,8 @@ private:
     static int  diff(int x1, int x2);
     static bool grtn(int x1, int x2);
     static bool lsth(int x1, int x2);
-    Node&       getNodeColumnConst(int index1, int index2);
-    Node&       getNodeRowConst   (int index1, int index2);
+    Node**      getNodeColumnConst(int index1, int index2);
+    Node**      getNodeRowConst   (int index1, int index2);
 
     float rnd01           ();
     unsigned short rnd0or1();
@@ -74,18 +70,18 @@ private:
 
     static const QColor m_backroundColor;
 
-    quint8 m_fieldSize;
-    int    m_rectSize;
-    qreal  m_rectMargin;
+    quint8  m_fieldSize;
+    int     m_rectSize;
+    qreal   m_rectMargin;
 
-    int    m_xOffset;
-    int    m_yOffset;
+    int     m_xOffset;
+    int     m_yOffset;
 
-    Node** m_grid;
+    Node*** m_grid;
 
     // statictics
-    int    m_maximumNode;
-    int    m_totalScore;
+    int     m_maximumNode;
+    int     m_totalScore;
 };
 
 #endif // PLAYGROUND_H

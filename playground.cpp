@@ -60,15 +60,24 @@ void Playground::paintEvent(QPaintEvent *event)
 
             QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
-            const Node& node = m_grid[x][y];
+            const Node* node = m_grid[x][y];
 
-            painter.setPen  (node.color());
-            painter.setBrush(node.color());
+            if (!node)
+            {
+                painter.setPen  (m_backroundColor);
+                painter.setBrush(m_backroundColor);
+                painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+
+                continue;
+            }
+
+            painter.setPen  (node->color());
+            painter.setBrush(node->color());
             painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
 
-            if (node.value())
+            if (node->value())
             {
-                QString valueStr  = QVariant(node.value()).toString();
+                QString valueStr  = QVariant(node->value()).toString();
                 painter.setPen  (m_backroundColor);
                 painter.setFont (font);
                 painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
@@ -125,12 +134,12 @@ void Playground::resizeEvent(QResizeEvent *event)
 
 void Playground::initGrid()
 {
-    m_grid = (Node**) malloc (m_fieldSize*sizeof(Node));
+    m_grid = (Node***) malloc (m_fieldSize*sizeof(Node***));
     for(int x = 0; x < m_fieldSize; ++x)
     {
-        m_grid[x] = (Node*) malloc (m_fieldSize*sizeof(Node));
+        m_grid[x] = (Node**) malloc (m_fieldSize*sizeof(Node**));
         for(int y = 0; y < m_fieldSize; ++y)
-            m_grid[x][y].setValue(0);
+            m_grid[x][y] = nullptr;
     }
 
     generateNewNode();
@@ -140,6 +149,9 @@ void Playground::clearGrid()
 {
     for(int x = 0; x < m_fieldSize; ++x)
     {
+        for(int y = 0; y < m_fieldSize; ++y)
+            delete m_grid[x][y];
+
         free(m_grid[x]);
     }
     free(m_grid);
@@ -150,7 +162,10 @@ void Playground::resetGrid()
     for(int x = 0; x < m_fieldSize; ++x)
     {
         for(int y = 0; y < m_fieldSize; ++y)
-            m_grid[x][y].setValue(0);
+        {
+            delete m_grid[x][y];
+            m_grid[x][y] = nullptr;
+        }
     }
 
     m_maximumNode = 0;
@@ -207,7 +222,7 @@ bool Playground::generateNewNode()
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-            if (!m_grid[x][y].value())
+            if (!m_grid[x][y])
                 vacantPlaces.append(QPoint(x,y));
         }
     }
@@ -215,7 +230,7 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    m_grid[point.x()][point.y()].setValue(value);
+    m_grid[point.x()][point.y()] = new Node(value);
     emit needToRepaint();
 
     m_totalScore += value;
@@ -236,7 +251,7 @@ void Playground::checkForGameOver()
     {
         for (int y = 0; y < m_fieldSize - 1; ++y)
         {
-            if (m_grid[x][y].value() == m_grid[x][y+1].value())
+            if (m_grid[x][y]->value() == m_grid[x][y+1]->value())
                 return;
         }
     }
@@ -245,23 +260,12 @@ void Playground::checkForGameOver()
     {
         for (int x = 0; x < m_fieldSize - 1; ++x)
         {
-            if (m_grid[x][y].value() == m_grid[x+1][y].value())
+            if (m_grid[x][y]->value() == m_grid[x+1][y]->value())
                 return;
         }
     }
 
     emit gameOver();
-}
-
-void Playground::moveNode(int xFrom, int yFrom, int xTo, int yTo)
-{
-    m_grid[xTo  ][yTo  ].setValue(m_grid[xFrom][yFrom].value());
-    m_grid[xFrom][yFrom].setValue(0);
-}
-
-void Playground::moveNodeInv(int xFrom, int yFrom, int xTo, int yTo)
-{
-    moveNode(yFrom, xFrom, yTo, xTo);
 }
 
 bool Playground::moveRoutine(Direction direction)
@@ -270,7 +274,6 @@ bool Playground::moveRoutine(Direction direction)
     Arithmetic arithmOper;
     Comparison compare;
     NodeAccess access;
-    NodeMove   move;
 
     int indexInit, indexLimit;
 
@@ -282,7 +285,6 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeRowConst;
-        move       = &Playground::moveNode;
         indexInit  = 0;
         indexLimit = m_fieldSize;
         break;
@@ -291,7 +293,6 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeRowConst;
-        move       = &Playground::moveNode;
         indexInit  = m_fieldSize-1;
         indexLimit = -1;
         break;
@@ -300,7 +301,6 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeColumnConst;
-        move       = &Playground::moveNodeInv;
         indexInit  = 0;
         indexLimit = m_fieldSize;
         break;
@@ -309,7 +309,6 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeColumnConst;
-        move       = &Playground::moveNodeInv;
         indexInit  = m_fieldSize-1;
         indexLimit = -1;
         break;
@@ -323,36 +322,35 @@ bool Playground::moveRoutine(Direction direction)
     {
         for (int indexTo = indexInit; compare(indexTo, indexLimit); moveIndex(indexTo))
         {
-            bool isIndexToEmpty = !(this->*access)(indexTo, indexTop).value();
-
-            quint16 valueTo;
-            if (isIndexToEmpty)
-                valueTo = 0;
-            else
-                valueTo = (this->*access)(indexTo, indexTop).value();
+            Node** nodeTo = (this->*access)(indexTo, indexTop);
 
             int indexFrom;
             for (indexFrom = arithmOper(indexTo, 1); compare(indexFrom, indexLimit); moveIndex(indexFrom))
             {
-                quint16 val = (this->*access)(indexFrom, indexTop).value();
-                if (!val)
+                Node** nodeFrom = (this->*access)(indexFrom, indexTop);
+                if (! *nodeFrom)
                     continue;
 
-                if (isIndexToEmpty)
+                if (! *nodeTo)
                 {
-                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
-                    result         = true;
-                    isIndexToEmpty = false;
-                    valueTo        = val;
+//                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
+                    *nodeTo   = *nodeFrom;
+                    *nodeFrom = nullptr;
+                    result    = true;
                     continue;
                 }
 
-                if (valueTo == (this->*access)(indexFrom, indexTop).value())
+                quint16 valueTo = (*nodeTo)->value();
+                if ((*nodeFrom)->value() == valueTo)
                 {
                     quint16 newValue = valueTo*2;
-                    (this->*access)(indexTo  , indexTop).setValue(newValue);
-                    (this->*access)(indexFrom, indexTop).setValue(0);
-                    result = true;
+
+                    delete *nodeTo;
+                    *nodeTo   = *nodeFrom;
+                    *nodeFrom = nullptr;
+
+                    result    = true;
+                    (*nodeTo)->setValue(newValue);
 
                     if (newValue > m_maximumNode)
                     {
@@ -365,7 +363,9 @@ bool Playground::moveRoutine(Direction direction)
                     int posToNear = arithmOper(indexTo, 1);
                     if (indexFrom != posToNear)
                     {
-                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
+                        *(this->*access)(posToNear, indexTop) = *nodeFrom;
+                        *nodeFrom = nullptr;
+//                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
                         result = true;
                     }
                 }
@@ -417,14 +417,14 @@ bool Playground::lsth(int x1, int x2)
     return x1<x2;
 }
 
-Node &Playground::getNodeColumnConst(int index1, int index2)
+Node **Playground::getNodeColumnConst(int index1, int index2)
 {
-    return m_grid[index2][index1];
+    return &m_grid[index2][index1];
 }
 
-Node &Playground::getNodeRowConst(int index1, int index2)
+Node **Playground::getNodeRowConst(int index1, int index2)
 {
-    return m_grid[index1][index2];
+    return &m_grid[index1][index2];
 }
 
 float Playground::rnd01()
