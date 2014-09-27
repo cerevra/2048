@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <stdlib.h>
+#include <QPropertyAnimation>
 
 #include "playground.h"
 
@@ -39,53 +40,53 @@ QSize Playground::sizeHint() const
 
 void Playground::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event)
+//    Q_UNUSED(event)
 
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
+//    QPainter painter(this);
+//    painter.setRenderHint(QPainter::Antialiasing, true);
 
-    int rectInterval  = m_rectSize + m_rectMargin;
+//    int rectInterval  = m_rectSize + m_rectMargin;
 
-    QFont font       = this->font();
-    font.setPointSizeF(m_rectSize/3);
-    int   fontHiegth = font.pointSize();
-    int   digitY     = (m_rectSize + fontHiegth)*0.5;
+//    QFont font       = this->font();
+//    font.setPointSizeF(m_rectSize/3);
+//    int   fontHiegth = font.pointSize();
+//    int   digitY     = (m_rectSize + fontHiegth)*0.5;
 
-    QFontMetrics fontMetrics(font);
+//    QFontMetrics fontMetrics(font);
 
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        for(int y = 0; y < m_fieldSize; ++y)
-        {
+//    for(int x = 0; x < m_fieldSize; ++x)
+//    {
+//        for(int y = 0; y < m_fieldSize; ++y)
+//        {
 
-            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
-                                 m_rectSize ,m_rectSize);
-            const Node* node = m_grid[x][y];
+//            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
+//                                 m_rectSize ,m_rectSize);
+//            const Node* node = m_grid[x][y];
 
-            if (!node)
-            {
-                painter.setPen  (m_backroundColor);
-                painter.setBrush(m_backroundColor);
-                painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+//            if (!node)
+//            {
+//                painter.setPen  (m_backroundColor);
+//                painter.setBrush(m_backroundColor);
+//                painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
 
-                continue;
-            }
+//                continue;
+//            }
 
-            painter.setPen  (node->color());
-            painter.setBrush(node->color());
-            painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+//            painter.setPen  (node->color());
+//            painter.setBrush(node->color());
+//            painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
 
-            if (node->value())
-            {
-                QString valueStr  = QVariant(node->value()).toString();
-                painter.setPen  (m_backroundColor);
-                painter.setFont (font);
-                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
-                                 y*rectInterval + digitY + m_yOffset,
-                                 valueStr);
-            }
-        }
-    }
+//            if (node->value())
+//            {
+//                QString valueStr  = QVariant(node->value()).toString();
+//                painter.setPen  (m_backroundColor);
+//                painter.setFont (font);
+//                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
+//                                 y*rectInterval + digitY + m_yOffset,
+//                                 valueStr);
+//            }
+//        }
+//    }
 }
 
 void Playground::keyPressEvent(QKeyEvent *event)
@@ -230,8 +231,17 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    m_grid[point.x()][point.y()] = new Node(value);
+    Node* a = m_grid[point.x()][point.y()] = new Node(value, this);
     emit needToRepaint();
+
+    a->show();
+    QPropertyAnimation* anim = new QPropertyAnimation(a, "geometry");
+
+    anim->setKeyValueAt(0, QRect(0, 0, 100, 30));
+    anim->setKeyValueAt(1, QRect(250, 250, 100, 30));
+
+    anim->setDuration(1000);
+    anim->start();
 
     m_totalScore += value;
     emit totalScore(m_totalScore);

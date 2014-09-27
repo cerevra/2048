@@ -3,18 +3,21 @@
 
 #include <QObject>
 #include <QColor>
+#include <QRectF>
+#include <QWidget>
 
-class Node : public QObject
+class Node : public QWidget
 {
-    Q_OBJECT
-    Q_PROPERTY(quint16 value READ value WRITE setValue)
 public:
-    explicit Node(quint16 value, QObject *parent = 0);
+    explicit Node(quint16 value, QWidget *parent = 0);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
 
     const QColor& color() const;
+
+protected:
+    void paintEvent    (QPaintEvent  *);
 
 signals:
 
