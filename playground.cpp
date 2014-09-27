@@ -321,35 +321,36 @@ bool Playground::moveRoutine(Direction direction)
 
     for (int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
     {
-        int posTo = -1;
-        for (int index = indexInit; compare(index, indexLimit); moveIndex(index))
+        for (int indexTo = indexInit; compare(indexTo, indexLimit); moveIndex(indexTo))
         {
-            if (!(this->*access)(index, indexTop).value())
-            {
-                if (posTo < 0)
-                    posTo = index;
-                continue;
-            }
+            bool isIndexToEmpty = !(this->*access)(indexTo, indexTop).value();
 
-            if (posTo < 0)
-                posTo = index;
+            quint16 valueTo;
+            if (isIndexToEmpty)
+                valueTo = 0;
             else
-            {
-                (this->*move)(index, indexTop, posTo, indexTop);
-                result = true;
-            }
+                valueTo = (this->*access)(indexTo, indexTop).value();
 
-            for (int indexNext = arithmOper(index, 1); compare(indexNext, indexLimit); moveIndex(indexNext))
+            int indexFrom;
+            for (indexFrom = arithmOper(indexTo, 1); compare(indexFrom, indexLimit); moveIndex(indexFrom))
             {
-                if (!(this->*access)(indexNext, indexTop).value())
+                if (!(this->*access)(indexFrom, indexTop).value())
                     continue;
 
-                quint16 curValue = (this->*access)(indexNext, indexTop).value();
-                if (curValue == (this->*access)(posTo, indexTop).value())
+                if (isIndexToEmpty)
                 {
-                    quint16 newValue = curValue*2;
-                    (this->*access)(posTo    , indexTop).setValue(newValue);
-                    (this->*access)(indexNext, indexTop).setValue(0);
+                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
+                    result         = true;
+                    isIndexToEmpty = false;
+                    valueTo        = (this->*access)(indexTo, indexTop).value();
+                    continue;
+                }
+
+                if (valueTo == (this->*access)(indexFrom, indexTop).value())
+                {
+                    quint16 newValue = valueTo*2;
+                    (this->*access)(indexTo  , indexTop).setValue(newValue);
+                    (this->*access)(indexFrom, indexTop).setValue(0);
                     result = true;
 
                     if (newValue > m_maximumNode)
@@ -360,17 +361,19 @@ bool Playground::moveRoutine(Direction direction)
                 }
                 else
                 {
-                    int posToNear = arithmOper(posTo, 1);
-                    if (indexNext != posToNear)
+                    int posToNear = arithmOper(indexTo, 1);
+                    if (indexFrom != posToNear)
                     {
-                        (this->*move)(indexNext, indexTop, posToNear, indexTop);
+                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
                         result = true;
                     }
                 }
 
-                posTo = -1;
                 break;
             }
+
+            if (indexFrom == indexLimit)
+                break;
         }
     }
     emit needToRepaint();
