@@ -334,7 +334,8 @@ bool Playground::moveRoutine(Direction direction)
             int indexFrom;
             for (indexFrom = arithmOper(indexTo, 1); compare(indexFrom, indexLimit); moveIndex(indexFrom))
             {
-                if (!(this->*access)(indexFrom, indexTop).value())
+                quint16 val = (this->*access)(indexFrom, indexTop).value();
+                if (!val)
                     continue;
 
                 if (isIndexToEmpty)
@@ -342,7 +343,7 @@ bool Playground::moveRoutine(Direction direction)
                     (this->*move)(indexFrom, indexTop, indexTo, indexTop);
                     result         = true;
                     isIndexToEmpty = false;
-                    valueTo        = (this->*access)(indexTo, indexTop).value();
+                    valueTo        = val;
                     continue;
                 }
 
