@@ -8,18 +8,21 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow     (parent               )
-    , ui              (new Ui::MainWindow   )
-    , m_topMargin     (100                  )
-    , m_lftMargin     (100                  )
-    , m_botMargin     (100                  )
-    , m_rgtMargin     (100                  )
-    , m_gridLayout    (new QGridLayout(this))
-    , m_playground    (new Playground (this))
-    , m_actionClose   (new QAction    (this))
-    , m_dialogAbout   (new About      (this))
-    , m_dialogSettings(new Settings   (this))
-    , m_highestScore  (0                    )
+    : QMainWindow       (parent               )
+    , ui                (new Ui::MainWindow   )
+    , m_topMargin       (100                  )
+    , m_lftMargin       (100                  )
+    , m_botMargin       (100                  )
+    , m_rgtMargin       (100                  )
+    , m_gridLayout      (new QGridLayout(this))
+    , m_playground      (new Playground (this))
+    , m_actionClose     (new QAction    (this))
+    , m_dialogAbout     (new About      (this))
+    , m_dialogSettings  (new Settings   (this))
+    , m_highestScore    (0                    )
+    , m_settings        (nullptr              )
+    , m_stsHighOption   ("highestScore"       )
+    , m_stsFieldSize    ("fieldSize"          )
 {
     ui->setupUi(this);
 
@@ -57,11 +60,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->actionExit    , SIGNAL(triggered()),
             this              , SLOT  (close    ()));
+
+    readPrevSession();
 }
 
 MainWindow::~MainWindow()
 {
+    saveCurrSession();
+
+    delete m_playground;
     delete ui;
+    delete m_settings;
+    delete m_gridLayout;
+    delete m_actionClose;
+    delete m_dialogAbout;
+    delete m_dialogSettings;
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
@@ -96,7 +109,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::gameIsOver()
 {
-    QMessageBox::information(this, QString("Game is over!"), QString());
+    QMessageBox::information(this, QString("Game is over!"), QString("Next time, bro..."));
 
     m_playground->resetGrid();
 }
@@ -104,6 +117,13 @@ void MainWindow::gameIsOver()
 void MainWindow::setMaximumNode(int max)
 {
     ui->lcdNumber_maxNode->display(max);
+
+    if (max == 2048)
+        QMessageBox::information(this,
+                                 QString("You win!"),
+                                 QString("You got a node with 2048!\n"
+                                         "Here should be girls and beer but I'm not sure about your age.\n"
+                                         "So... Congratulations!"));
 }
 
 void MainWindow::setTotalScore(int total)
@@ -120,4 +140,29 @@ void MainWindow::setTotalScore(int total)
 void MainWindow::transmitFieldSize()
 {
     m_dialogSettings->setFieldSize(m_playground->fieldSize());
+}
+
+void MainWindow::readPrevSession()
+{
+    m_settings = new QSettings(QSettings::NativeFormat,
+                               QSettings::UserScope,
+                               qApp->organizationName(),
+                               qApp->applicationName (),
+                               this);
+
+    m_highestScore = m_settings->value(m_stsHighOption).toInt();
+    if (m_highestScore)
+        ui->lcdNumber_highestScore->display(m_highestScore);
+
+    int size = m_settings->value(m_stsFieldSize).toInt();
+    if (size)
+        m_playground->setFieldSize(size);
+}
+
+void MainWindow::saveCurrSession()
+{
+    m_settings->setValue(m_stsHighOption, m_highestScore);
+    m_settings->setValue(m_stsFieldSize , m_playground->fieldSize());
+
+    m_settings->sync();
 }

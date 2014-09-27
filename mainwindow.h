@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QSettings>
 
 #include "about.h"
 #include "settings.h"
@@ -36,6 +37,9 @@ protected slots:
     void transmitFieldSize();
 
 private:
+    void readPrevSession  ();
+    void saveCurrSession  ();
+
     Ui::MainWindow *ui;
 
     int          m_topMargin;
@@ -50,6 +54,10 @@ private:
     Settings   * m_dialogSettings;
 
     int          m_highestScore;
+
+    QSettings  * m_settings;
+    QString      m_stsHighOption;
+    QString      m_stsFieldSize;
 };
 
 #endif // MAINWINDOW_H

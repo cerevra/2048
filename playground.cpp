@@ -11,6 +11,8 @@ const QColor Playground::m_backroundColor = QColor(176,196,222);
 Playground::Playground(QWidget *parent)
     : QWidget      (parent)
     , m_fieldSize  (4     )
+    , m_xOffset    (0     )
+    , m_yOffset    (0     )
     , m_maximumNode(0     )
     , m_totalScore (0     )
 {
@@ -47,7 +49,7 @@ void Playground::paintEvent(QPaintEvent *event)
     QFont font       = this->font();
     font.setPointSizeF(m_rectSize/3);
     int   fontHiegth = font.pointSize();
-    int digitY = (m_rectSize + fontHiegth)*0.5;
+    int   digitY     = (m_rectSize + fontHiegth)*0.5;
 
     QFontMetrics fontMetrics(font);
 
@@ -56,21 +58,30 @@ void Playground::paintEvent(QPaintEvent *event)
         for(int y = 0; y < m_fieldSize; ++y)
         {
 
-            QRect currentRect(x*rectInterval,y*rectInterval,
+            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
-            const Node& node = m_grid[x][y];
+            const Node* node = m_grid[x][y];
 
-            painter.setPen  (node.color());
-            painter.setBrush(node.color());
+            if (!node)
+            {
+                painter.setPen  (m_backroundColor);
+                painter.setBrush(m_backroundColor);
+                painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+
+                continue;
+            }
+
+            painter.setPen  (node->color());
+            painter.setBrush(node->color());
             painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
 
-            if (node.value())
+            if (node->value())
             {
-                QString valueStr  = QVariant(node.value()).toString();
+                QString valueStr  = QVariant(node->value()).toString();
                 painter.setPen  (m_backroundColor);
                 painter.setFont (font);
-                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5,
-                                 y*rectInterval + digitY,
+                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
+                                 y*rectInterval + digitY + m_yOffset,
                                  valueStr);
             }
         }
@@ -100,9 +111,21 @@ void Playground::keyPressEvent(QKeyEvent *event)
 
 void Playground::resizeEvent(QResizeEvent *event)
 {
-    QSize newSize = event->size   ();
-    int   minimum = newSize.height() < newSize.width() ? newSize.height()
-                                                       : newSize.width ();
+    QSize newSize = event->size();
+    int newHeigth = newSize.height();
+    int newWidth  = newSize.width ();
+
+    int minimum;
+    if (newHeigth < newWidth)
+    {
+        minimum   =  newHeigth;
+        m_xOffset = (newWidth  - minimum)/2;
+    }
+    else
+    {
+        minimum   =  newWidth;
+        m_yOffset = (newHeigth - minimum)/2;
+    }
 
     setRectSize(minimum*5/(m_fieldSize*6));
 
@@ -111,12 +134,12 @@ void Playground::resizeEvent(QResizeEvent *event)
 
 void Playground::initGrid()
 {
-    m_grid = (Node**) malloc (m_fieldSize*sizeof(Node));
+    m_grid = (Node***) malloc (m_fieldSize*sizeof(Node***));
     for(int x = 0; x < m_fieldSize; ++x)
     {
-        m_grid[x] = (Node*) malloc (m_fieldSize*sizeof(Node));
+        m_grid[x] = (Node**) malloc (m_fieldSize*sizeof(Node**));
         for(int y = 0; y < m_fieldSize; ++y)
-            m_grid[x][y].setValue(0);
+            m_grid[x][y] = nullptr;
     }
 
     generateNewNode();
@@ -126,6 +149,9 @@ void Playground::clearGrid()
 {
     for(int x = 0; x < m_fieldSize; ++x)
     {
+        for(int y = 0; y < m_fieldSize; ++y)
+            delete m_grid[x][y];
+
         free(m_grid[x]);
     }
     free(m_grid);
@@ -136,7 +162,10 @@ void Playground::resetGrid()
     for(int x = 0; x < m_fieldSize; ++x)
     {
         for(int y = 0; y < m_fieldSize; ++y)
-            m_grid[x][y].setValue(0);
+        {
+            delete m_grid[x][y];
+            m_grid[x][y] = nullptr;
+        }
     }
 
     m_maximumNode = 0;
@@ -193,7 +222,7 @@ bool Playground::generateNewNode()
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-            if (!m_grid[x][y].value())
+            if (!m_grid[x][y])
                 vacantPlaces.append(QPoint(x,y));
         }
     }
@@ -201,7 +230,7 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    m_grid[point.x()][point.y()].setValue(value);
+    m_grid[point.x()][point.y()] = new Node(value);
     emit needToRepaint();
 
     m_totalScore += value;
@@ -222,7 +251,7 @@ void Playground::checkForGameOver()
     {
         for (int y = 0; y < m_fieldSize - 1; ++y)
         {
-            if (m_grid[x][y].value() == m_grid[x][y+1].value())
+            if (m_grid[x][y]->value() == m_grid[x][y+1]->value())
                 return;
         }
     }
@@ -231,7 +260,7 @@ void Playground::checkForGameOver()
     {
         for (int x = 0; x < m_fieldSize - 1; ++x)
         {
-            if (m_grid[x][y].value() == m_grid[x+1][y].value())
+            if (m_grid[x][y]->value() == m_grid[x+1][y]->value())
                 return;
         }
     }
@@ -239,22 +268,9 @@ void Playground::checkForGameOver()
     emit gameOver();
 }
 
-void Playground::moveNode(int xFrom, int yFrom, int xTo, int yTo)
+bool Playground::moveRoutine(Direction direction)
 {
-    m_grid[xTo  ][yTo  ].setValue(m_grid[xFrom][yFrom].value());
-    m_grid[xFrom][yFrom].setValue(0);
-}
-
-void Playground::moveNodeInv(int xFrom, int yFrom, int xTo, int yTo)
-{
-    moveNode(yFrom, xFrom, yTo, xTo);
-}
-
-bool Playground::moveRoutine(Playground::Direction direction)
-{
-    bool result = false;
-
-    Movement   move;
+    Movement   moveIndex;
     Arithmetic arithmOper;
     Comparison compare;
     NodeAccess access;
@@ -265,150 +281,103 @@ bool Playground::moveRoutine(Playground::Direction direction)
     switch (direction)
     {
     case Direction::Left:
-        move       = &incr;
+        moveIndex  = &incr;
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeRowConst;
         indexInit  = 0;
-        indexLimit = m_fieldSize-1;
+        indexLimit = m_fieldSize;
         break;
     case Direction::Right:
-        move       = &decr;
+        moveIndex  = &decr;
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeRowConst;
         indexInit  = m_fieldSize-1;
-        indexLimit = 0;
+        indexLimit = -1;
         break;
     case Direction::Up:
-        move       = &incr;
+        moveIndex  = &incr;
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeColumnConst;
         indexInit  = 0;
-        indexLimit = m_fieldSize-1;
+        indexLimit = m_fieldSize;
         break;
     case Direction::Down:
-        move       = &decr;
+        moveIndex  = &decr;
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeColumnConst;
         indexInit  = m_fieldSize-1;
-        indexLimit = 0;
+        indexLimit = -1;
         break;
     default:
         break;
     }
 
-    // todo: optimize
-    for(int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
-    {
-        for(int index = indexInit; compare(index, indexLimit); move(index))
-        {
-            bool moveResult = moveRects(indexTop,direction);
-            if (!result)
-                result = moveResult;
-
-            quint16 curValue = (this->*access)(index, indexTop).value();
-            if (!curValue)
-                break;
-
-            if (curValue == (this->*access)(arithmOper(index, 1), indexTop).value())
-            {
-                quint16 newValue = curValue*2;
-                (this->*access)(index               , indexTop).setValue(newValue);
-                (this->*access)(arithmOper(index, 1), indexTop).setValue(0);
-                result = true;
-
-                if (newValue > m_maximumNode)
-                {
-                    m_maximumNode = newValue;
-                    emit maximumNode(m_maximumNode);
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
-bool Playground::moveRects(quint8 indexConst, Playground::Direction direction)
-{
     bool result = false;
 
-    Movement   move;
-    Arithmetic arithmOper;
-    Comparison compare;
-    NodeAccess access;
-    NodeMerge  merge;
-
-    int indexTo, indexToLimit;
-
-    // todo optimize
-    switch (direction)
+    for (int indexTop = 0; indexTop < m_fieldSize; ++indexTop)
     {
-    case Direction::Left:
-        move         = &incr;
-        arithmOper   = &summ;
-        compare      = &lsth;
-        access       = &Playground::getNodeRowConst;
-        merge        = &Playground::moveNode;
-        indexTo      = 0;
-        indexToLimit = m_fieldSize-1;
-        break;
-    case Direction::Right:
-        move         = &decr;
-        arithmOper   = &diff;
-        compare      = &grtn;
-        access       = &Playground::getNodeRowConst;
-        merge        = &Playground::moveNode;
-        indexTo      = m_fieldSize-1;
-        indexToLimit = 0;
-        break;
-    case Direction::Up:
-        move         = &incr;
-        arithmOper   = &summ;
-        compare      = &lsth;
-        access       = &Playground::getNodeColumnConst;
-        merge        = &Playground::moveNodeInv;
-        indexTo      = 0;
-        indexToLimit = m_fieldSize-1;
-        break;
-    case Direction::Down:
-        move         = &decr;
-        arithmOper   = &diff;
-        compare      = &grtn;
-        access       = &Playground::getNodeColumnConst;
-        merge        = &Playground::moveNodeInv;
-        indexTo      = m_fieldSize-1;
-        indexToLimit = 0;
-        break;
-    default:
-        return false;
-        break;
-    }
-
-    for(; compare(indexTo, indexToLimit); move(indexTo))
-    {
-        if (!(this->*access)(indexTo,indexConst).value())
+        for (int indexTo = indexInit; compare(indexTo, indexLimit); moveIndex(indexTo))
         {
-            int indexFromLimit = arithmOper(indexToLimit, 1);
+            Node** nodeTo = (this->*access)(indexTo, indexTop);
 
             int indexFrom;
-            for(indexFrom = arithmOper(indexTo,1); compare(indexFrom, indexFromLimit); move(indexFrom))
+            for (indexFrom = arithmOper(indexTo, 1); compare(indexFrom, indexLimit); moveIndex(indexFrom))
             {
-                if ((this->*access)(indexFrom,indexConst).value())
+                Node** nodeFrom = (this->*access)(indexFrom, indexTop);
+                if (! *nodeFrom)
+                    continue;
+
+                if (! *nodeTo)
                 {
-                    (this->*merge)(indexFrom,indexConst,indexTo,indexConst);
-                    result = true;
-                    break;
+//                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
+                    *nodeTo   = *nodeFrom;
+                    *nodeFrom = nullptr;
+                    result    = true;
+                    continue;
                 }
+
+                quint16 valueTo = (*nodeTo)->value();
+                if ((*nodeFrom)->value() == valueTo)
+                {
+                    quint16 newValue = valueTo*2;
+
+                    delete *nodeTo;
+                    *nodeTo   = *nodeFrom;
+                    *nodeFrom = nullptr;
+
+                    result    = true;
+                    (*nodeTo)->setValue(newValue);
+
+                    if (newValue > m_maximumNode)
+                    {
+                        m_maximumNode = newValue;
+                        emit maximumNode(m_maximumNode);
+                    }
+                }
+                else
+                {
+                    int posToNear = arithmOper(indexTo, 1);
+                    if (indexFrom != posToNear)
+                    {
+                        *(this->*access)(posToNear, indexTop) = *nodeFrom;
+                        *nodeFrom = nullptr;
+//                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
+                        result = true;
+                    }
+                }
+
+                break;
             }
-            if (indexFrom == indexFromLimit)
+
+            if (indexFrom == indexLimit)
                 break;
         }
     }
-
+    emit needToRepaint();
     return result;
 }
 
@@ -448,14 +417,14 @@ bool Playground::lsth(int x1, int x2)
     return x1<x2;
 }
 
-Node &Playground::getNodeColumnConst(int index1, int index2)
+Node **Playground::getNodeColumnConst(int index1, int index2)
 {
-    return m_grid[index2][index1];
+    return &m_grid[index2][index1];
 }
 
-Node &Playground::getNodeRowConst(int index1, int index2)
+Node **Playground::getNodeRowConst(int index1, int index2)
 {
-    return m_grid[index1][index2];
+    return &m_grid[index1][index2];
 }
 
 float Playground::rnd01()
