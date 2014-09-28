@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QColor>
-#include <QRectF>
 #include <QWidget>
 
 class Node : public QWidget
@@ -18,6 +17,7 @@ public:
 
 protected:
     void paintEvent    (QPaintEvent  *);
+    void resizeEvent   (QResizeEvent *event);
 
 signals:
 
@@ -64,6 +64,10 @@ private:
 
     quint16 m_value;
     QColor  m_color;
+
+    QFont   m_font;
+    int     m_size;
+    int     m_digitY;
 };
 
 #endif // NODE_H
