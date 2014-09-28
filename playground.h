@@ -39,7 +39,7 @@ public slots:
     void setFieldSize  (quint8 size);
 
 protected:
-    void paintEvent    (QPaintEvent  *event);
+    void paintEvent    (QPaintEvent  *);
     void keyPressEvent (QKeyEvent    *event);
     void resizeEvent   (QResizeEvent *event);
 
@@ -54,6 +54,8 @@ private:
     bool moveRoutine         (Direction direction);
 
     void setRectSize     (int rectSize);
+
+    void addAnimation    (Node* node, const QPoint* to, const QPoint* from = nullptr);
 
     static int& incr(int& arg);
     static int& decr(int& arg);

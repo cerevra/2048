@@ -38,7 +38,7 @@ QSize Playground::sizeHint() const
     return QSize(m_rectSize,m_rectSize);
 }
 
-void Playground::paintEvent(QPaintEvent *event)
+void Playground::paintEvent(QPaintEvent *)
 {
 //    Q_UNUSED(event)
 
@@ -231,17 +231,9 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    Node* a = m_grid[point.x()][point.y()] = new Node(value, this);
-    emit needToRepaint();
-
-    a->show();
-    QPropertyAnimation* anim = new QPropertyAnimation(a, "geometry");
-
-    anim->setKeyValueAt(0, QRect(0, 0, 100, 30));
-    anim->setKeyValueAt(1, QRect(250, 250, 100, 30));
-
-    anim->setDuration(1000);
-    anim->start();
+    Node* node = m_grid[point.x()][point.y()] = new Node(value, this);
+    node->show();
+    addAnimation(node, &point);
 
     m_totalScore += value;
     emit totalScore(m_totalScore);
@@ -252,6 +244,7 @@ bool Playground::generateNewNode()
         emit maximumNode(value);
     }
 
+//    emit needToRepaint();
     return vacantPlaces.size() - 1;
 }
 
@@ -343,7 +336,6 @@ bool Playground::moveRoutine(Direction direction)
 
                 if (! *nodeTo)
                 {
-//                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
                     *nodeTo   = *nodeFrom;
                     *nodeFrom = nullptr;
                     result    = true;
@@ -375,7 +367,6 @@ bool Playground::moveRoutine(Direction direction)
                     {
                         *(this->*access)(posToNear, indexTop) = *nodeFrom;
                         *nodeFrom = nullptr;
-//                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
                         result = true;
                     }
                 }
@@ -395,6 +386,28 @@ void Playground::setRectSize(int rectSize)
 {
     m_rectSize   = rectSize;
     m_rectMargin = rectSize/5;
+}
+
+void Playground::addAnimation(Node *node, const QPoint *to, const QPoint *from)
+{
+    QRect               curGeometry = node->geometry();
+    QPropertyAnimation* anim        = new QPropertyAnimation(node, "geometry", this);
+    int rectInterval  = m_rectSize + m_rectMargin;
+
+    if (from)
+    {}
+    else
+    {
+        anim->setStartValue(QRect(m_xOffset + to->x()*rectInterval + m_rectSize/2,
+                                  m_yOffset + to->y()*rectInterval + m_rectSize/2,
+                                  0, 0));
+        anim->setEndValue  (QRect(m_xOffset + to->x()*rectInterval,
+                                  m_yOffset + to->y()*rectInterval,
+                                  m_rectSize, m_rectSize));
+        anim->setEasingCurve(QEasingCurve::InOutQuad);
+        anim->setDuration(300);
+    }
+    anim->start(QPropertyAnimation::DeleteWhenStopped);
 }
 
 int &Playground::incr(int &arg)
