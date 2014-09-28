@@ -46,7 +46,6 @@ private:
     int          m_lftMargin;
     int          m_botMargin;
     int          m_rgtMargin;
-    QGridLayout* m_gridLayout;
     Playground * m_playground;
     QAction    * m_actionClose;
 

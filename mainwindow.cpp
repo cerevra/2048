@@ -14,8 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
     , m_lftMargin       (100                  )
     , m_botMargin       (100                  )
     , m_rgtMargin       (100                  )
-    , m_gridLayout      (new QGridLayout(this))
-    , m_playground      (new Playground (this))
     , m_actionClose     (new QAction    (this))
     , m_dialogAbout     (new About      (this))
     , m_dialogSettings  (new Settings   (this))
@@ -26,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_gridLayout->addWidget         (m_playground);
-    m_playground->installEventFilter(this        );
+    m_playground = new Playground (this);
+    m_playground->installEventFilter(this);
 
     // adding hotkey for closing
     addAction(m_actionClose);
@@ -71,7 +69,6 @@ MainWindow::~MainWindow()
     delete m_playground;
     delete ui;
     delete m_settings;
-    delete m_gridLayout;
     delete m_actionClose;
     delete m_dialogAbout;
     delete m_dialogSettings;
@@ -98,7 +95,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QSize size = event->size();
 
-    m_gridLayout->setGeometry(
+    m_playground->setGeometry(
         QRect(m_lftMargin,
               m_topMargin,
               size.width ()-(m_lftMargin+m_rgtMargin),
