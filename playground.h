@@ -9,10 +9,11 @@
 
 class Playground : public QWidget
 {
-    typedef int& (*Movement  )             (int&);
-    typedef int  (*Arithmetic)             (int,int);
-    typedef bool (*Comparison)             (int,int);
-    typedef Node**(Playground::* NodeAccess)(int,int);
+    typedef int&    (*Movement   )            (int&);
+    typedef int     (*Arithmetic )            (int, int);
+    typedef bool    (*Comparison )            (int, int);
+    typedef Node**  (Playground::* NodeAccess)(int, int);
+    typedef QPoint* (*Coordinates)            (int, int);
 
     enum class Direction {Up, Down, Right, Left};
 
@@ -55,16 +56,18 @@ private:
 
     void setRectSize     (int rectSize);
 
-    void addAnimation    (Node* node, const QPoint* to, const QPoint* from = nullptr);
+    void addAnimation    (Node* node, const QPoint* from, const QPoint* to);
 
-    static int& incr(int& arg);
-    static int& decr(int& arg);
-    static int  summ(int x1, int x2);
-    static int  diff(int x1, int x2);
-    static bool grtn(int x1, int x2);
-    static bool lsth(int x1, int x2);
-    Node**      getNodeColumnConst(int index1, int index2);
-    Node**      getNodeRowConst   (int index1, int index2);
+    static int&    incr              (int& arg);
+    static int&    decr              (int& arg);
+    static int     summ              (int x1, int x2);
+    static int     diff              (int x1, int x2);
+    static bool    grtn              (int x1, int x2);
+    static bool    lsth              (int x1, int x2);
+    static QPoint* coordinates       (int x, int y);
+    static QPoint* coordinatesInv    (int y, int x);
+           Node**  getNodeColumnConst(int y, int x);
+           Node**  getNodeRowConst   (int x, int y);
 
     float rnd01           ();
     unsigned short rnd0or1();
