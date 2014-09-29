@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     playground.cpp \
     node.cpp \
     about.cpp \
-    settings.cpp
+    settings.cpp \
+    styles.cpp
 
 HEADERS  += mainwindow.h \
     playground.h \
