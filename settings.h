@@ -18,6 +18,7 @@ public:
     ~Settings();
 
     void setFieldSize(quint8 size);
+    void setRectStyle(Style style);
 
 protected slots:
     void okPressed    ();

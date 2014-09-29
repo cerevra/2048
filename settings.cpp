@@ -25,6 +25,16 @@ void Settings::setFieldSize(quint8 size)
     ui->spinBox->setValue(m_size);
 }
 
+void Settings::setRectStyle(Style style)
+{
+    m_style = style;
+
+    if (style == Style::Classic)
+        ui->radioButton_styleClassic->toggle();
+    else if (style == Style::Metro)
+        ui->radioButton_styleMetro->toggle();
+}
+
 void Settings::okPressed()
 {
     bool settingsChanged = false;

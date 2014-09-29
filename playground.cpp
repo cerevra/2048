@@ -9,13 +9,14 @@
 
 const QColor Playground::m_backroundColor = QColor(176,196,222);
 
-Playground::Playground(QWidget *parent)
-    : QWidget      (parent)
-    , m_fieldSize  (4     )
-    , m_xOffset    (0     )
-    , m_yOffset    (0     )
-    , m_maximumNode(0     )
-    , m_totalScore (0     )
+Playground::Playground(QWidget *parent  )
+    : QWidget      (parent              )
+    , m_fieldSize  (4                   )
+    , m_xOffset    (0                   )
+    , m_yOffset    (0                   )
+    , m_maximumNode(0                   )
+    , m_totalScore (0                   )
+    , m_style      (Styles::defaultStyle)
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
@@ -50,12 +51,16 @@ void Playground::paintEvent(QPaintEvent *)
         for(int y = 0; y < m_fieldSize; ++y)
         {
 
-            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
+            QRect rect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
 
             painter.setPen  (m_backroundColor);
             painter.setBrush(m_backroundColor);
-            painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+
+            if (m_style == Style::Classic)
+                painter.drawRoundedRect(rect, m_rectMargin, m_rectMargin);
+            else if (m_style == Style::Metro)
+                painter.drawRect(rect);
         }
     }
 }
@@ -161,6 +166,11 @@ quint16 Playground::getTotalScr() const
     return m_totalScore;
 }
 
+Style Playground::style() const
+{
+    return m_style;
+}
+
 void Playground::setFieldSize(quint8 size)
 {
     if (size == m_fieldSize)
@@ -175,6 +185,23 @@ void Playground::setFieldSize(quint8 size)
 
     initGrid();
     resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
+}
+
+void Playground::setRectStyle(Style style)
+{
+    m_style = style;
+
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize; ++y)
+        {
+            Node* node = m_grid[x][y];
+            if (node)
+                node->setRectStyle(style);
+        }
+    }
+
+    emit needToRepaint();
 }
 
 void Playground::keyPress(Playground::Direction direction)
@@ -202,7 +229,7 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    Node* node = m_grid[point.x()][point.y()] = new Node(value, this);
+    Node* node = m_grid[point.x()][point.y()] = new Node(value, this, m_style);
     node->show();
     addAnimation(node, nullptr, &point);
 

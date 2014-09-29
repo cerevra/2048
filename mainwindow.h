@@ -9,6 +9,7 @@
 #include "settings.h"
 
 #include "playground.h"
+#include "styles.h"
 
 namespace Ui {
 class MainWindow;
@@ -33,12 +34,13 @@ public slots:
     void setMaximumNode   (int max);
     void setTotalScore    (int total);
 
+    void saveCurrSession  ();
+
 protected slots:
     void transmitFieldSize();
 
 private:
     void readPrevSession  ();
-    void saveCurrSession  ();
 
     Ui::MainWindow *ui;
 
@@ -57,6 +59,7 @@ private:
     QSettings  * m_settings;
     QString      m_stsHighOption;
     QString      m_stsFieldSize;
+    QString      m_stsStyle;
 };
 
 #endif // MAINWINDOW_H

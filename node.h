@@ -5,15 +5,19 @@
 #include <QColor>
 #include <QWidget>
 
+#include "styles.h"
+
 class Node : public QWidget
 {
 public:
-    explicit Node(quint16 value, QWidget *parent = 0);
+    explicit Node(quint16 value, QWidget *parent = 0, Style style = Styles::defaultStyle);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
 
     const QColor& color() const;
+
+    void setRectStyle  (Style style);
 
 protected:
     void paintEvent    (QPaintEvent  *);
@@ -68,6 +72,8 @@ private:
     QFont   m_font;
     int     m_size;
     int     m_digitY;
+
+    Style   m_style;
 };
 
 #endif // NODE_H

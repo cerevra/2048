@@ -6,6 +6,7 @@
 #include <QColor>
 
 #include "node.h"
+#include "styles.h"
 
 class Playground : public QWidget
 {
@@ -29,6 +30,8 @@ public:
     quint16 getMaxNode () const;
     quint16 getTotalScr() const;
 
+    Style style    () const;
+
 signals:
     void needToRepaint ();
     void gameOver      ();
@@ -38,6 +41,7 @@ signals:
 
 public slots:
     void setFieldSize  (quint8 size);
+    void setRectStyle  (Style style);
 
 protected:
     void paintEvent    (QPaintEvent  *);
@@ -87,6 +91,8 @@ private:
     // statictics
     int     m_maximumNode;
     int     m_totalScore;
+
+    Style m_style;
 };
 
 #endif // PLAYGROUND_H
