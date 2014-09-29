@@ -25,13 +25,15 @@ protected slots:
 
 signals:
     void fieldSize   (quint8 size);
-    void style       (RectStyle style);
+    void style       (Style style);
+
+    void changed     ();
 
 private:
     Ui::Settings *ui;
 
     quint8 m_size;
-    RectStyle m_style;
+    Style m_style;
 };
 
 #endif // SETTINGS_H
