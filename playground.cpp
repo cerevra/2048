@@ -3,18 +3,20 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <stdlib.h>
+#include <QPropertyAnimation>
 
 #include "playground.h"
 
 const QColor Playground::m_backroundColor = QColor(176,196,222);
 
-Playground::Playground(QWidget *parent)
-    : QWidget      (parent)
-    , m_fieldSize  (4     )
-    , m_xOffset    (0     )
-    , m_yOffset    (0     )
-    , m_maximumNode(0     )
-    , m_totalScore (0     )
+Playground::Playground(QWidget *parent  )
+    : QWidget      (parent              )
+    , m_fieldSize  (4                   )
+    , m_xOffset    (0                   )
+    , m_yOffset    (0                   )
+    , m_maximumNode(0                   )
+    , m_totalScore (0                   )
+    , m_style      (Styles::defaultStyle)
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
@@ -37,53 +39,28 @@ QSize Playground::sizeHint() const
     return QSize(m_rectSize,m_rectSize);
 }
 
-void Playground::paintEvent(QPaintEvent *event)
+void Playground::paintEvent(QPaintEvent *)
 {
-    Q_UNUSED(event)
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     int rectInterval  = m_rectSize + m_rectMargin;
-
-    QFont font       = this->font();
-    font.setPointSizeF(m_rectSize/3);
-    int   fontHiegth = font.pointSize();
-    int   digitY     = (m_rectSize + fontHiegth)*0.5;
-
-    QFontMetrics fontMetrics(font);
 
     for(int x = 0; x < m_fieldSize; ++x)
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
 
-            QRect currentRect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
+            QRect rect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
-            const Node* node = m_grid[x][y];
 
-            if (!node)
-            {
-                painter.setPen  (m_backroundColor);
-                painter.setBrush(m_backroundColor);
-                painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
+            painter.setPen  (m_backroundColor);
+            painter.setBrush(m_backroundColor);
 
-                continue;
-            }
-
-            painter.setPen  (node->color());
-            painter.setBrush(node->color());
-            painter.drawRoundedRect(currentRect, m_rectMargin, m_rectMargin);
-
-            if (node->value())
-            {
-                QString valueStr  = QVariant(node->value()).toString();
-                painter.setPen  (m_backroundColor);
-                painter.setFont (font);
-                painter.drawText(x*rectInterval + (m_rectSize - fontMetrics.width(valueStr))*0.5 + m_xOffset,
-                                 y*rectInterval + digitY + m_yOffset,
-                                 valueStr);
-            }
+            if (m_style == Style::Classic)
+                painter.drawRoundedRect(rect, m_rectMargin, m_rectMargin);
+            else if (m_style == Style::Metro)
+                painter.drawRect(rect);
         }
     }
 }
@@ -189,6 +166,11 @@ quint16 Playground::getTotalScr() const
     return m_totalScore;
 }
 
+Style Playground::style() const
+{
+    return m_style;
+}
+
 void Playground::setFieldSize(quint8 size)
 {
     if (size == m_fieldSize)
@@ -203,6 +185,23 @@ void Playground::setFieldSize(quint8 size)
 
     initGrid();
     resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
+}
+
+void Playground::setRectStyle(Style style)
+{
+    m_style = style;
+
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize; ++y)
+        {
+            Node* node = m_grid[x][y];
+            if (node)
+                node->setRectStyle(style);
+        }
+    }
+
+    emit needToRepaint();
 }
 
 void Playground::keyPress(Playground::Direction direction)
@@ -230,8 +229,9 @@ bool Playground::generateNewNode()
 
     quint16 value = 2*int(1+rnd0or1());
 
-    m_grid[point.x()][point.y()] = new Node(value);
-    emit needToRepaint();
+    Node* node = m_grid[point.x()][point.y()] = new Node(value, this, m_style);
+    node->show();
+    addAnimation(node, nullptr, &point);
 
     m_totalScore += value;
     emit totalScore(m_totalScore);
@@ -242,6 +242,7 @@ bool Playground::generateNewNode()
         emit maximumNode(value);
     }
 
+//    emit needToRepaint();
     return vacantPlaces.size() - 1;
 }
 
@@ -270,11 +271,11 @@ void Playground::checkForGameOver()
 
 bool Playground::moveRoutine(Direction direction)
 {
-    Movement   moveIndex;
-    Arithmetic arithmOper;
-    Comparison compare;
-    NodeAccess access;
-
+    Movement    moveIndex;
+    Arithmetic  arithmOper;
+    Comparison  compare;
+    NodeAccess  access;
+    Coordinates coords;
     int indexInit, indexLimit;
 
     // todo optimize
@@ -285,6 +286,7 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeRowConst;
+        coords     = &Playground::coordinates;
         indexInit  = 0;
         indexLimit = m_fieldSize;
         break;
@@ -293,6 +295,7 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeRowConst;
+        coords     = &Playground::coordinates;
         indexInit  = m_fieldSize-1;
         indexLimit = -1;
         break;
@@ -301,6 +304,7 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &summ;
         compare    = &lsth;
         access     = &Playground::getNodeColumnConst;
+        coords     = &Playground::coordinatesInv;
         indexInit  = 0;
         indexLimit = m_fieldSize;
         break;
@@ -309,6 +313,7 @@ bool Playground::moveRoutine(Direction direction)
         arithmOper = &diff;
         compare    = &grtn;
         access     = &Playground::getNodeColumnConst;
+        coords     = &Playground::coordinatesInv;
         indexInit  = m_fieldSize-1;
         indexLimit = -1;
         break;
@@ -333,10 +338,12 @@ bool Playground::moveRoutine(Direction direction)
 
                 if (! *nodeTo)
                 {
-//                    (this->*move)(indexFrom, indexTop, indexTo, indexTop);
                     *nodeTo   = *nodeFrom;
                     *nodeFrom = nullptr;
                     result    = true;
+                    addAnimation(*nodeTo,
+                                 coords(indexFrom ,indexTop),
+                                 coords(indexTo   ,indexTop));
                     continue;
                 }
 
@@ -352,6 +359,10 @@ bool Playground::moveRoutine(Direction direction)
                     result    = true;
                     (*nodeTo)->setValue(newValue);
 
+                    addAnimation(*nodeTo,
+                                 coords(indexFrom ,indexTop),
+                                 coords(indexTo   ,indexTop));
+
                     if (newValue > m_maximumNode)
                     {
                         m_maximumNode = newValue;
@@ -363,10 +374,13 @@ bool Playground::moveRoutine(Direction direction)
                     int posToNear = arithmOper(indexTo, 1);
                     if (indexFrom != posToNear)
                     {
-                        *(this->*access)(posToNear, indexTop) = *nodeFrom;
+                        Node** nodeNear = (this->*access)(posToNear, indexTop);
+                        *nodeNear = *nodeFrom;
                         *nodeFrom = nullptr;
-//                        (this->*move)(indexFrom, indexTop, posToNear, indexTop);
                         result = true;
+                        addAnimation(*nodeNear,
+                                     coords(indexFrom ,indexTop),
+                                     coords(posToNear ,indexTop));
                     }
                 }
 
@@ -385,6 +399,35 @@ void Playground::setRectSize(int rectSize)
 {
     m_rectSize   = rectSize;
     m_rectMargin = rectSize/5;
+}
+
+void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
+{
+    QPropertyAnimation* anim         = new QPropertyAnimation(node, "geometry", this);
+    int                 rectInterval = m_rectSize + m_rectMargin;
+
+    if (from)
+    {
+        anim->setStartValue(QRect(m_xOffset + from->x()*rectInterval,
+                                  m_yOffset + from->y()*rectInterval,
+                                  m_rectSize, m_rectSize));
+        anim->setEndValue  (QRect(m_xOffset + to  ->x()*rectInterval,
+                                  m_yOffset + to  ->y()*rectInterval,
+                                  m_rectSize, m_rectSize));
+    }
+    else
+    {
+        anim->setStartValue(QRect(m_xOffset + to->x()*rectInterval + m_rectSize/2,
+                                  m_yOffset + to->y()*rectInterval + m_rectSize/2,
+                                  0, 0));
+        anim->setEndValue  (QRect(m_xOffset + to->x()*rectInterval,
+                                  m_yOffset + to->y()*rectInterval,
+                                  m_rectSize, m_rectSize));
+    }
+
+    anim->setEasingCurve(QEasingCurve::InOutQuad);
+    anim->setDuration(300);
+    anim->start(QPropertyAnimation::DeleteWhenStopped);
 }
 
 int &Playground::incr(int &arg)
@@ -417,14 +460,24 @@ bool Playground::lsth(int x1, int x2)
     return x1<x2;
 }
 
-Node **Playground::getNodeColumnConst(int index1, int index2)
+QPoint *Playground::coordinates(int x, int y)
 {
-    return &m_grid[index2][index1];
+    return new QPoint(x, y);
 }
 
-Node **Playground::getNodeRowConst(int index1, int index2)
+QPoint *Playground::coordinatesInv(int y, int x)
 {
-    return &m_grid[index1][index2];
+    return new QPoint(x, y);
+}
+
+Node **Playground::getNodeColumnConst(int y, int x)
+{
+    return &m_grid[x][y];
+}
+
+Node **Playground::getNodeRowConst(int x, int y)
+{
+    return &m_grid[x][y];
 }
 
 float Playground::rnd01()

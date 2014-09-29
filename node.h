@@ -3,18 +3,25 @@
 
 #include <QObject>
 #include <QColor>
+#include <QWidget>
 
-class Node : public QObject
+#include "styles.h"
+
+class Node : public QWidget
 {
-    Q_OBJECT
-    Q_PROPERTY(quint16 value READ value WRITE setValue)
 public:
-    explicit Node(quint16 value, QObject *parent = 0);
+    explicit Node(quint16 value, QWidget *parent = 0, Style style = Styles::defaultStyle);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
 
     const QColor& color() const;
+
+    void setRectStyle  (Style style);
+
+protected:
+    void paintEvent    (QPaintEvent  *);
+    void resizeEvent   (QResizeEvent *event);
 
 signals:
 
@@ -61,6 +68,12 @@ private:
 
     quint16 m_value;
     QColor  m_color;
+
+    QFont   m_font;
+    int     m_size;
+    int     m_digitY;
+
+    Style   m_style;
 };
 
 #endif // NODE_H

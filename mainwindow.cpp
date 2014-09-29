@@ -14,8 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
     , m_lftMargin       (100                  )
     , m_botMargin       (100                  )
     , m_rgtMargin       (100                  )
-    , m_gridLayout      (new QGridLayout(this))
-    , m_playground      (new Playground (this))
     , m_actionClose     (new QAction    (this))
     , m_dialogAbout     (new About      (this))
     , m_dialogSettings  (new Settings   (this))
@@ -23,11 +21,12 @@ MainWindow::MainWindow(QWidget *parent)
     , m_settings        (nullptr              )
     , m_stsHighOption   ("highestScore"       )
     , m_stsFieldSize    ("fieldSize"          )
+    , m_stsStyle        ("style"              )
 {
     ui->setupUi(this);
 
-    m_gridLayout->addWidget         (m_playground);
-    m_playground->installEventFilter(this        );
+    m_playground = new Playground (this);
+    m_playground->installEventFilter(this);
 
     // adding hotkey for closing
     addAction(m_actionClose);
@@ -51,12 +50,16 @@ MainWindow::MainWindow(QWidget *parent)
             m_dialogAbout     , SLOT  (show     ()));
 
     // Settings dialog
-    connect(ui->actionSettings, SIGNAL(triggered()),
-            m_dialogSettings  , SLOT  (show     ()));
+    connect(ui->actionSettings, SIGNAL(triggered        ()),
+            m_dialogSettings  , SLOT  (show             ()));
     connect(ui->actionSettings, SIGNAL(triggered        ()),
             this              , SLOT  (transmitFieldSize()));
-    connect(m_dialogSettings  , SIGNAL(fieldSize   (quint8)),
-            m_playground      , SLOT  (setFieldSize(quint8)));
+    connect(m_dialogSettings  , SIGNAL(fieldSize        (quint8)),
+            m_playground      , SLOT  (setFieldSize     (quint8)));
+    connect(m_dialogSettings  , SIGNAL(style            (Style)),
+            m_playground      , SLOT  (setRectStyle     (Style)));
+    connect(m_dialogSettings  , SIGNAL(changed          ()),
+            this              , SLOT  (saveCurrSession  ()));
 
     connect(ui->actionExit    , SIGNAL(triggered()),
             this              , SLOT  (close    ()));
@@ -71,7 +74,6 @@ MainWindow::~MainWindow()
     delete m_playground;
     delete ui;
     delete m_settings;
-    delete m_gridLayout;
     delete m_actionClose;
     delete m_dialogAbout;
     delete m_dialogSettings;
@@ -98,7 +100,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QSize size = event->size();
 
-    m_gridLayout->setGeometry(
+    m_playground->setGeometry(
         QRect(m_lftMargin,
               m_topMargin,
               size.width ()-(m_lftMargin+m_rgtMargin),
@@ -157,12 +159,21 @@ void MainWindow::readPrevSession()
     int size = m_settings->value(m_stsFieldSize).toInt();
     if (size)
         m_playground->setFieldSize(size);
+
+    QString style = m_settings->value(m_stsStyle).toString();
+    if (!style.isEmpty())
+    {
+        Style st = Styles::resolve(style);
+        m_dialogSettings->setRectStyle(st);
+        m_playground    ->setRectStyle(st);
+    }
 }
 
 void MainWindow::saveCurrSession()
 {
     m_settings->setValue(m_stsHighOption, m_highestScore);
     m_settings->setValue(m_stsFieldSize , m_playground->fieldSize());
+    m_settings->setValue(m_stsStyle     , Styles::resolve(m_playground->style()));
 
     m_settings->sync();
 }
