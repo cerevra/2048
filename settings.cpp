@@ -11,7 +11,7 @@ Settings::Settings(QWidget *parent) :
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okPressed    ()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelPressed()));
-}
+ }
 
 Settings::~Settings()
 {
@@ -26,11 +26,28 @@ void Settings::setFieldSize(quint8 size)
 
 void Settings::okPressed()
 {
-    m_size = ui->spinBox->value();
-    emit fieldSize(m_size);
+    // Field size
+    quint8 newSize = ui->spinBox->value();
+    if (newSize != m_size)
+        emit fieldSize(m_size);
+
+    // Style
+    RectStyle newStyle;
+    if (ui->radioButton_styleClassic->isChecked())
+        newStyle = RectStyle::Classic;
+    else if (ui->radioButton_styleMetro->isChecked())
+        newStyle = RectStyle::Metro;
+
+    if (newStyle != m_style)
+        emit style    (m_style);
 }
 
 void Settings::cancelPressed()
 {
     ui->spinBox->setValue(m_size);
+
+    if (m_style == RectStyle::Classic)
+        ui->radioButton_styleClassic->toggle();
+    else if (m_style == RectStyle::Metro)
+        ui->radioButton_styleMetro  ->toggle();
 }

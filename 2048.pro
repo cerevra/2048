@@ -23,7 +23,8 @@ HEADERS  += mainwindow.h \
     playground.h \
     node.h \
     about.h \
-    settings.h
+    settings.h \
+    styles.h
 
 FORMS    += mainwindow.ui \
     about.ui \

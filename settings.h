@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "styles.h"
+
 namespace Ui {
 class Settings;
 }
@@ -23,11 +25,13 @@ protected slots:
 
 signals:
     void fieldSize   (quint8 size);
+    void style       (RectStyle style);
 
 private:
     Ui::Settings *ui;
 
     quint8 m_size;
+    RectStyle m_style;
 };
 
 #endif // SETTINGS_H
