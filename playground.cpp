@@ -12,11 +12,15 @@ const QColor Playground::m_backroundColor = QColor(176,196,222);
 Playground::Playground(QWidget *parent  )
     : QWidget      (parent              )
     , m_fieldSize  (4                   )
+    , m_rectSize   (0                   )
+    , m_rectMargin (0                   )
     , m_xOffset    (0                   )
     , m_yOffset    (0                   )
     , m_maximumNode(0                   )
     , m_totalScore (0                   )
     , m_style      (Styles::defaultStyle)
+    , m_animCreate (this                )
+    , m_animMove   (this                )
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
@@ -25,6 +29,10 @@ Playground::Playground(QWidget *parent  )
 
     connect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
     initGrid();
+    connect(&m_animMove  , SIGNAL(finished      ()),
+            &m_animCreate, SLOT  (start         ()));
+    connect(&m_animCreate, SIGNAL(finished      ()),
+            this         , SLOT  (clearAnimation()));
 }
 
 Playground::~Playground()
@@ -32,11 +40,6 @@ Playground::~Playground()
     disconnect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
 
     clearGrid();
-}
-
-QSize Playground::sizeHint() const
-{
-    return QSize(m_rectSize,m_rectSize);
 }
 
 void Playground::paintEvent(QPaintEvent *)
@@ -107,6 +110,15 @@ void Playground::resizeEvent(QResizeEvent *event)
     setRectSize(minimum*5/(m_fieldSize*6));
 
     QWidget::resizeEvent(event);
+}
+
+void Playground::clearAnimation()
+{
+    m_animCreate.clear();
+    m_animMove  .clear();
+
+    int a = m_animMove.children().size();
+    int i =0;
 }
 
 void Playground::initGrid()
@@ -241,8 +253,8 @@ bool Playground::generateNewNode()
         m_maximumNode = value;
         emit maximumNode(value);
     }
-
-//    emit needToRepaint();
+m_animMove.start();
+    emit needToRepaint();
     return vacantPlaces.size() - 1;
 }
 
@@ -391,7 +403,9 @@ bool Playground::moveRoutine(Direction direction)
                 break;
         }
     }
+
     emit needToRepaint();
+
     return result;
 }
 
@@ -406,6 +420,9 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
     QPropertyAnimation* anim         = new QPropertyAnimation(node, "geometry", this);
     int                 rectInterval = m_rectSize + m_rectMargin;
 
+    anim->setEasingCurve(QEasingCurve::InOutQuad);
+    anim->setDuration(300);
+
     if (from)
     {
         anim->setStartValue(QRect(m_xOffset + from->x()*rectInterval,
@@ -414,6 +431,8 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
         anim->setEndValue  (QRect(m_xOffset + to  ->x()*rectInterval,
                                   m_yOffset + to  ->y()*rectInterval,
                                   m_rectSize, m_rectSize));
+
+        m_animMove.addAnimation(anim);
     }
     else
     {
@@ -423,11 +442,9 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
         anim->setEndValue  (QRect(m_xOffset + to->x()*rectInterval,
                                   m_yOffset + to->y()*rectInterval,
                                   m_rectSize, m_rectSize));
-    }
 
-    anim->setEasingCurve(QEasingCurve::InOutQuad);
-    anim->setDuration(300);
-    anim->start(QPropertyAnimation::DeleteWhenStopped);
+        m_animCreate.addAnimation(anim);
+    }
 }
 
 int &Playground::incr(int &arg)

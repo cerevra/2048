@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QColor>
+#include <QParallelAnimationGroup>
 
 #include "node.h"
 #include "styles.h"
@@ -22,7 +23,6 @@ class Playground : public QWidget
 public:
     explicit Playground(QWidget *parent = 0);
     ~Playground();
-    QSize    sizeHint  () const;
 
     void   resetGrid   ();
     quint8 fieldSize   () const;
@@ -30,7 +30,7 @@ public:
     quint16 getMaxNode () const;
     quint16 getTotalScr() const;
 
-    Style style    () const;
+    Style style        () const;
 
 signals:
     void needToRepaint ();
@@ -47,6 +47,9 @@ protected:
     void paintEvent    (QPaintEvent  *);
     void keyPressEvent (QKeyEvent    *event);
     void resizeEvent   (QResizeEvent *event);
+
+protected slots:
+    void clearAnimation();
 
 private:
     void initGrid        ();
@@ -92,7 +95,10 @@ private:
     int     m_maximumNode;
     int     m_totalScore;
 
-    Style m_style;
+    Style   m_style;
+
+    QParallelAnimationGroup m_animCreate;
+    QParallelAnimationGroup m_animMove;
 };
 
 #endif // PLAYGROUND_H
