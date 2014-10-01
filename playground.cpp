@@ -7,32 +7,30 @@
 
 #include "playground.h"
 
-const QColor Playground::m_backroundColor = QColor(176,196,222);
+const QColor Playground::m_backroundColor = QColor(176, 196, 222);
 
-Playground::Playground(QWidget *parent  )
-    : QWidget      (parent              )
-    , m_fieldSize  (4                   )
-    , m_rectSize   (0                   )
-    , m_rectMargin (0                   )
-    , m_xOffset    (0                   )
-    , m_yOffset    (0                   )
-    , m_maximumNode(0                   )
-    , m_totalScore (0                   )
-    , m_style      (Styles::defaultStyle)
-    , m_animCreate (this                )
-    , m_animMove   (this                )
+Playground::Playground(QWidget *parent   )
+    : QWidget       (parent              )
+    , m_fieldSize   (4                   )
+    , m_rectSize    (0                   )
+    , m_rectMargin  (0                   )
+    , m_xOffset     (0                   )
+    , m_yOffset     (0                   )
+    , m_maximumNode (0                   )
+    , m_totalScore  (0                   )
+    , m_style       (Styles::defaultStyle)
+    , m_animCreate  (nullptr             )
+    , m_animMove    (nullptr             )
+    , m_firstDisplay(true                )
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
 
     qsrand(QDateTime::currentDateTime().toTime_t());
 
-    connect(this,SIGNAL(needToRepaint()),this,SLOT(repaint()));
+    connect(this, SIGNAL(needToRepaint()), this, SLOT(repaint()));
+
     initGrid();
-    connect(&m_animMove  , SIGNAL(finished      ()),
-            &m_animCreate, SLOT  (start         ()));
-    connect(&m_animCreate, SIGNAL(finished      ()),
-            this         , SLOT  (clearAnimation()));
 }
 
 Playground::~Playground()
@@ -53,7 +51,6 @@ void Playground::paintEvent(QPaintEvent *)
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-
             QRect rect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
                                  m_rectSize ,m_rectSize);
 
@@ -110,15 +107,15 @@ void Playground::resizeEvent(QResizeEvent *event)
     setRectSize(minimum*5/(m_fieldSize*6));
 
     QWidget::resizeEvent(event);
-}
 
-void Playground::clearAnimation()
-{
-    m_animCreate.clear();
-    m_animMove  .clear();
+    if (m_firstDisplay && minimum > 100)
+    {
+        m_firstDisplay = false;
 
-    int a = m_animMove.children().size();
-    int i =0;
+        addAnimation(m_node, nullptr, &m_firstPoint);
+        m_node->show();
+        m_animCreate->start();
+    }
 }
 
 void Playground::initGrid()
@@ -131,6 +128,7 @@ void Playground::initGrid()
             m_grid[x][y] = nullptr;
     }
 
+    initAnimation(true);
     generateNewNode();
 }
 
@@ -146,6 +144,29 @@ void Playground::clearGrid()
     free(m_grid);
 }
 
+void Playground::initAnimation(bool firstStart)
+{
+    m_animCreate = new QParallelAnimationGroup();
+    connect(m_animCreate, SIGNAL(finished   ()),
+            m_animCreate, SLOT  (deleteLater()));
+
+    if (!firstStart)
+    {
+        m_animMove = new QParallelAnimationGroup();
+        connect(m_animMove  , SIGNAL(finished   ()),
+                m_animCreate, SLOT  (start      ()));
+        connect(m_animMove  , SIGNAL(finished   ()),
+                this        , SLOT  (nodeShow   ()));
+        connect(m_animMove  , SIGNAL(finished   ()),
+                m_animMove  , SLOT  (deleteLater()));
+    }
+}
+
+void Playground::nodeShow()
+{
+    m_node->show();
+}
+
 void Playground::resetGrid()
 {
     for(int x = 0; x < m_fieldSize; ++x)
@@ -159,8 +180,11 @@ void Playground::resetGrid()
 
     m_maximumNode = 0;
     m_totalScore  = 0;
+    m_firstDisplay = true;
 
+    initAnimation(true);
     generateNewNode();
+    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
 }
 
 quint8 Playground::fieldSize() const
@@ -194,7 +218,9 @@ void Playground::setFieldSize(quint8 size)
 
     m_maximumNode = 0;
     m_totalScore  = 0;
+    m_firstDisplay = true;
 
+    initAnimation(true);
     initGrid();
     resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
 }
@@ -242,8 +268,12 @@ bool Playground::generateNewNode()
     quint16 value = 2*int(1+rnd0or1());
 
     Node* node = m_grid[point.x()][point.y()] = new Node(value, this, m_style);
-    node->show();
-    addAnimation(node, nullptr, &point);
+
+    m_node  = node;
+    if (m_firstDisplay)
+        m_firstPoint = point;
+    else
+        addAnimation(node, nullptr, &point);
 
     m_totalScore += value;
     emit totalScore(m_totalScore);
@@ -253,8 +283,10 @@ bool Playground::generateNewNode()
         m_maximumNode = value;
         emit maximumNode(value);
     }
-m_animMove.start();
-    emit needToRepaint();
+
+    if (!m_firstDisplay)
+        m_animMove->start();
+
     return vacantPlaces.size() - 1;
 }
 
@@ -283,6 +315,8 @@ void Playground::checkForGameOver()
 
 bool Playground::moveRoutine(Direction direction)
 {
+    initAnimation();
+
     Movement    moveIndex;
     Arithmetic  arithmOper;
     Comparison  compare;
@@ -421,7 +455,7 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
     int                 rectInterval = m_rectSize + m_rectMargin;
 
     anim->setEasingCurve(QEasingCurve::InOutQuad);
-    anim->setDuration(300);
+    anim->setDuration(100);
 
     if (from)
     {
@@ -432,18 +466,18 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
                                   m_yOffset + to  ->y()*rectInterval,
                                   m_rectSize, m_rectSize));
 
-        m_animMove.addAnimation(anim);
+        m_animMove->addAnimation(anim);
     }
     else
     {
         anim->setStartValue(QRect(m_xOffset + to->x()*rectInterval + m_rectSize/2,
                                   m_yOffset + to->y()*rectInterval + m_rectSize/2,
-                                  0, 0));
+                                  3, 3));
         anim->setEndValue  (QRect(m_xOffset + to->x()*rectInterval,
                                   m_yOffset + to->y()*rectInterval,
                                   m_rectSize, m_rectSize));
 
-        m_animCreate.addAnimation(anim);
+        m_animCreate->addAnimation(anim);
     }
 }
 

@@ -49,11 +49,13 @@ protected:
     void resizeEvent   (QResizeEvent *event);
 
 protected slots:
-    void clearAnimation();
+    void nodeShow        ();
 
 private:
     void initGrid        ();
     void clearGrid       ();
+
+    void initAnimation   (bool firstStart = false);
 
     void keyPress        (Direction direction);
     bool generateNewNode ();
@@ -71,12 +73,12 @@ private:
     static int     diff              (int x1, int x2);
     static bool    grtn              (int x1, int x2);
     static bool    lsth              (int x1, int x2);
-    static QPoint* coordinates       (int x, int y);
-    static QPoint* coordinatesInv    (int y, int x);
-           Node**  getNodeColumnConst(int y, int x);
-           Node**  getNodeRowConst   (int x, int y);
+    static QPoint* coordinates       (int x , int y );
+    static QPoint* coordinatesInv    (int y , int x );
+           Node**  getNodeColumnConst(int y , int x );
+           Node**  getNodeRowConst   (int x , int y );
 
-    float rnd01           ();
+    float          rnd01  ();
     unsigned short rnd0or1();
 
 
@@ -97,8 +99,13 @@ private:
 
     Style   m_style;
 
-    QParallelAnimationGroup m_animCreate;
-    QParallelAnimationGroup m_animMove;
+    QParallelAnimationGroup* m_animCreate;
+    QParallelAnimationGroup* m_animMove;
+
+    bool    m_firstDisplay;
+
+    Node*   m_node;
+    QPoint  m_firstPoint;
 };
 
 #endif // PLAYGROUND_H

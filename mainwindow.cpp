@@ -42,8 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
             this              , SLOT  (setMaximumNode(int)));
     connect(m_playground      , SIGNAL(totalScore    (int)),
             this              , SLOT  (setTotalScore (int)));
-    setMaximumNode(m_playground->getMaxNode ());
-    setTotalScore (m_playground->getTotalScr());
 
     // About dialog
     connect(ui->actionAbout   , SIGNAL(triggered()),
@@ -65,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent)
             this              , SLOT  (close    ()));
 
     readPrevSession();
+
+    setMaximumNode(m_playground->getMaxNode ());
+    setTotalScore (m_playground->getTotalScr());
 }
 
 MainWindow::~MainWindow()
