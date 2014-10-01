@@ -106,6 +106,21 @@ void Playground::resizeEvent(QResizeEvent *event)
 
     setRectSize(minimum*5/(m_fieldSize*6));
 
+    int rectInterval = m_rectMargin + m_rectSize;
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize; ++y)
+        {
+            Node* node = m_grid[x][y];
+            if (node)
+            {
+                node->setGeometry(QRect(m_xOffset + x*rectInterval,
+                                        m_yOffset + y*rectInterval,
+                                        m_rectSize, m_rectSize));
+            }
+        }
+    }
+
     QWidget::resizeEvent(event);
 
     if (m_firstDisplay && minimum > 100)
