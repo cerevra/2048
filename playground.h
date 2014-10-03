@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QColor>
+#include <QParallelAnimationGroup>
 
 #include "node.h"
 #include "styles.h"
@@ -22,7 +23,6 @@ class Playground : public QWidget
 public:
     explicit Playground(QWidget *parent = 0);
     ~Playground();
-    QSize    sizeHint  () const;
 
     void   resetGrid   ();
     quint8 fieldSize   () const;
@@ -30,7 +30,7 @@ public:
     quint16 getMaxNode () const;
     quint16 getTotalScr() const;
 
-    Style style    () const;
+    Style style        () const;
 
 signals:
     void needToRepaint ();
@@ -48,9 +48,14 @@ protected:
     void keyPressEvent (QKeyEvent    *event);
     void resizeEvent   (QResizeEvent *event);
 
+protected slots:
+    void nodeShow        ();
+
 private:
     void initGrid        ();
     void clearGrid       ();
+
+    void initAnimation   (bool firstStart = false);
 
     void keyPress        (Direction direction);
     bool generateNewNode ();
@@ -68,12 +73,12 @@ private:
     static int     diff              (int x1, int x2);
     static bool    grtn              (int x1, int x2);
     static bool    lsth              (int x1, int x2);
-    static QPoint* coordinates       (int x, int y);
-    static QPoint* coordinatesInv    (int y, int x);
-           Node**  getNodeColumnConst(int y, int x);
-           Node**  getNodeRowConst   (int x, int y);
+    static QPoint* coordinates       (int x , int y );
+    static QPoint* coordinatesInv    (int y , int x );
+           Node**  getNodeColumnConst(int y , int x );
+           Node**  getNodeRowConst   (int x , int y );
 
-    float rnd01           ();
+    float          rnd01  ();
     unsigned short rnd0or1();
 
 
@@ -92,7 +97,15 @@ private:
     int     m_maximumNode;
     int     m_totalScore;
 
-    Style m_style;
+    Style   m_style;
+
+    QParallelAnimationGroup* m_animCreate;
+    QParallelAnimationGroup* m_animMove;
+
+    bool    m_firstDisplay;
+
+    Node*   m_node;
+    QPoint  m_firstPoint;
 };
 
 #endif // PLAYGROUND_H
