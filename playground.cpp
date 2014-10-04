@@ -180,6 +180,11 @@ void Playground::initAnimation(bool firstStart)
 void Playground::nodeShow()
 {
     m_node->show();
+
+    foreach(Node* node, m_toDelete)
+        node->deleteLater();
+
+    m_toDelete.clear();
 }
 
 void Playground::resetGrid()
@@ -413,7 +418,7 @@ bool Playground::moveRoutine(Direction direction)
                 {
                     quint16 newValue = valueTo*2;
 
-                    delete *nodeTo;
+                    m_toDelete.append(*nodeTo);
                     *nodeTo   = *nodeFrom;
                     *nodeFrom = nullptr;
 

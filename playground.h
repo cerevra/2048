@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QList>
 #include <QColor>
 #include <QParallelAnimationGroup>
 
@@ -106,6 +107,8 @@ private:
 
     Node*   m_node;
     QPoint  m_firstPoint;
+
+    QList<Node*> m_toDelete;
 };
 
 #endif // PLAYGROUND_H
