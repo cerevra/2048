@@ -19,14 +19,15 @@ Playground::Playground(QWidget *parent   )
     , m_maximumNode (0                   )
     , m_totalScore  (0                   )
     , m_style       (Styles::defaultStyle)
+    , m_firstDisplay(true                )
+    , m_node        (nullptr             )
     , m_animCreate  (nullptr             )
     , m_animMove    (nullptr             )
-    , m_firstDisplay(true                )
 {
     setFocusPolicy(Qt::StrongFocus);
     setFocus      (Qt::ActiveWindowFocusReason);
 
-    qsrand(QDateTime::currentDateTime().toTime_t());
+    qsrand (QDateTime::currentDateTime().toTime_t());
 
     connect(this, SIGNAL(needToRepaint()), this, SLOT(repaint()));
 
@@ -40,6 +41,63 @@ Playground::~Playground()
     clearGrid();
 }
 
+quint8 Playground::fieldSize() const
+{
+    return m_fieldSize;
+}
+
+Style Playground::style() const
+{
+    return m_style;
+}
+
+quint16 Playground::getMaxNode() const
+{
+    return m_maximumNode;
+}
+
+quint16 Playground::getTotalScr() const
+{
+    return m_totalScore;
+}
+
+void Playground::resetGrid()
+{
+    // it's cheaper to clear grid (delete m_grid[x][y]; - so it was)
+    // but this solution is more simple for code understanding
+    clearGrid  ();
+    initGrid   ();
+    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
+}
+
+void Playground::setFieldSize(quint8 size)
+{
+    if (size == m_fieldSize)
+        return;
+
+    clearGrid  ();
+    m_fieldSize = size;
+    initGrid   ();
+    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
+}
+
+void Playground::setRectStyle(Style style)
+{
+    m_style = style;
+
+    for(int x = 0; x < m_fieldSize; ++x)
+    {
+        for(int y = 0; y < m_fieldSize; ++y)
+        {
+            Node* node = m_grid[x][y];
+            if (node)
+                node->setRectStyle(style);
+        }
+    }
+
+    emit needToRepaint();
+}
+
 void Playground::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -51,16 +109,18 @@ void Playground::paintEvent(QPaintEvent *)
     {
         for(int y = 0; y < m_fieldSize; ++y)
         {
-            QRect rect(m_xOffset+x*rectInterval, m_yOffset+y*rectInterval,
-                                 m_rectSize ,m_rectSize);
+            QRect rect(m_xOffset + x*rectInterval,
+                       m_yOffset + y*rectInterval,
+                       m_rectSize,
+                       m_rectSize);
 
             painter.setPen  (m_backroundColor);
             painter.setBrush(m_backroundColor);
 
-            if (m_style == Style::Classic)
+            if      (m_style == Style::Classic)
                 painter.drawRoundedRect(rect, m_rectMargin, m_rectMargin);
-            else if (m_style == Style::Metro)
-                painter.drawRect(rect);
+            else if (m_style == Style::Metro  )
+                painter.drawRect       (rect);
         }
     }
 }
@@ -69,17 +129,17 @@ void Playground::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key())
     {
-    case Qt::Key_Left:
-        keyPress(Direction::Left);
+    case Qt::Key_Left :
+        keyPress(Direction::Left );
         break;
     case Qt::Key_Right:
         keyPress(Direction::Right);
         break;
-    case Qt::Key_Down:
-        keyPress(Direction::Down);
+    case Qt::Key_Down :
+        keyPress(Direction::Down );
         break;
-    case Qt::Key_Up:
-        keyPress(Direction::Up);
+    case Qt::Key_Up   :
+        keyPress(Direction::Up   );
         break;
     default:
         break;
@@ -97,10 +157,12 @@ void Playground::resizeEvent(QResizeEvent *event)
     {
         minimum   =  newHeigth;
         m_xOffset = (newWidth  - minimum)/2;
+        m_yOffset = 0;
     }
     else
     {
         minimum   =  newWidth;
+        m_xOffset = 0;
         m_yOffset = (newHeigth - minimum)/2;
     }
 
@@ -128,13 +190,26 @@ void Playground::resizeEvent(QResizeEvent *event)
         m_firstDisplay = false;
 
         addAnimation(m_node, nullptr, &m_firstPoint);
-        m_node->show();
+        m_node      ->show ();
         m_animCreate->start();
     }
 }
 
+void Playground::nodeShow()
+{
+    m_node->show();
+
+    foreach(Node* node, m_toDelete)
+        node->deleteLater();
+    m_toDelete.clear();
+}
+
 void Playground::initGrid()
 {
+    m_maximumNode  = 0;
+    m_totalScore   = 0;
+    m_firstDisplay = true;
+
     m_grid = new Node**[m_fieldSize];
     for(int x = 0; x < m_fieldSize; ++x)
     {
@@ -143,7 +218,7 @@ void Playground::initGrid()
             m_grid[x][y] = nullptr;
     }
 
-    initAnimation(true);
+    initAnimation  (true);
     generateNewNode();
 }
 
@@ -175,91 +250,6 @@ void Playground::initAnimation(bool firstStart)
         connect(m_animMove  , SIGNAL(finished   ()),
                 m_animMove  , SLOT  (deleteLater()));
     }
-}
-
-void Playground::nodeShow()
-{
-    m_node->show();
-
-    foreach(Node* node, m_toDelete)
-        node->deleteLater();
-
-    m_toDelete.clear();
-}
-
-void Playground::resetGrid()
-{
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        for(int y = 0; y < m_fieldSize; ++y)
-        {
-            delete m_grid[x][y];
-            m_grid[x][y] = nullptr;
-        }
-    }
-
-    m_maximumNode = 0;
-    m_totalScore  = 0;
-    m_firstDisplay = true;
-
-    initAnimation(true);
-    generateNewNode();
-    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
-}
-
-quint8 Playground::fieldSize() const
-{
-    return m_fieldSize;
-}
-
-quint16 Playground::getMaxNode() const
-{
-    return m_maximumNode;
-}
-
-quint16 Playground::getTotalScr() const
-{
-    return m_totalScore;
-}
-
-Style Playground::style() const
-{
-    return m_style;
-}
-
-void Playground::setFieldSize(quint8 size)
-{
-    if (size == m_fieldSize)
-        return;
-
-    clearGrid();
-
-    m_fieldSize   = size;
-
-    m_maximumNode = 0;
-    m_totalScore  = 0;
-    m_firstDisplay = true;
-
-    initAnimation(true);
-    initGrid();
-    resizeEvent(new QResizeEvent(QSize(this->width(),this->height()),QSize()));
-}
-
-void Playground::setRectStyle(Style style)
-{
-    m_style = style;
-
-    for(int x = 0; x < m_fieldSize; ++x)
-    {
-        for(int y = 0; y < m_fieldSize; ++y)
-        {
-            Node* node = m_grid[x][y];
-            if (node)
-                node->setRectStyle(style);
-        }
-    }
-
-    emit needToRepaint();
 }
 
 void Playground::keyPress(Playground::Direction direction)
@@ -344,7 +334,6 @@ bool Playground::moveRoutine(Direction direction)
     Coordinates coords;
     int indexInit, indexLimit;
 
-    // todo optimize
     switch (direction)
     {
     case Direction::Left:
@@ -362,7 +351,7 @@ bool Playground::moveRoutine(Direction direction)
         compare    = &grtn;
         access     = &Playground::getNodeRowConst;
         coords     = &Playground::coordinates;
-        indexInit  = m_fieldSize-1;
+        indexInit  = m_fieldSize - 1;
         indexLimit = -1;
         break;
     case Direction::Up:
@@ -380,7 +369,7 @@ bool Playground::moveRoutine(Direction direction)
         compare    = &grtn;
         access     = &Playground::getNodeColumnConst;
         coords     = &Playground::coordinatesInv;
-        indexInit  = m_fieldSize-1;
+        indexInit  = m_fieldSize - 1;
         indexLimit = -1;
         break;
     default:
@@ -501,6 +490,20 @@ void Playground::addAnimation(Node *node, const QPoint *from, const QPoint *to)
     }
 }
 
+float Playground::rnd01()
+{
+    return qrand()/float(RAND_MAX);  // RAND_MAX from <stdlib.h>
+}
+
+quint16 Playground::rnd0or1()
+{
+    float rndValue = rnd01();
+    if (rndValue < 0.5)
+        return 0;
+    else
+        return 1;
+}
+
 int &Playground::incr(int &arg)
 {
     return ++arg;
@@ -549,18 +552,4 @@ Node **Playground::getNodeColumnConst(int y, int x)
 Node **Playground::getNodeRowConst(int x, int y)
 {
     return &m_grid[x][y];
-}
-
-float Playground::rnd01()
-{
-    return qrand()/float(RAND_MAX);  // from <stdlib.h>
-}
-
-unsigned short Playground::rnd0or1()
-{
-    float rndValue = rnd01();
-    if (rndValue < 0.5)
-        return 0;
-    else
-        return 1;
 }

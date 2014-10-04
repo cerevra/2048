@@ -10,7 +10,9 @@
 class Node : public QWidget
 {
 public:
-    explicit Node(quint16 value, QWidget *parent = 0, Style style = Styles::defaultStyle);
+    explicit Node      (quint16  value,
+                        QWidget *parent = 0,
+                        Style    style  = Styles::defaultStyle);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
@@ -23,14 +25,10 @@ protected:
     void paintEvent    (QPaintEvent  *);
     void resizeEvent   (QResizeEvent *event);
 
-signals:
-
-public slots:
-
 private:
     void refreshPix    ();
 
-    qreal log2(qreal val);
+    static qreal log2  (qreal val);
 
     class ColorHandler
     {
@@ -55,7 +53,7 @@ private:
             {
                 index -= m_colors.size();
 
-                if (!index)
+                if ( !index)
                     ++index;
             }
 

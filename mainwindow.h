@@ -12,7 +12,7 @@
 #include "styles.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -20,24 +20,21 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow   (QWidget *parent = 0);
     ~MainWindow();
 
-    bool eventFilter(QObject * watched, QEvent * event);
+    bool eventFilter      (QObject * watched, QEvent * event);
 
 protected:
-    void resizeEvent(QResizeEvent *event              );
+    void resizeEvent      (QResizeEvent *event              );
 
 public slots:
-    void gameIsOver       ();
+    void gameOver         ();
 
     void setMaximumNode   (int max);
     void setTotalScore    (int total);
 
     void saveCurrSession  ();
-
-protected slots:
-    void transmitFieldSize();
 
 private:
     void readPrevSession  ();
@@ -49,15 +46,14 @@ private:
     int          m_botMargin;
     int          m_rgtMargin;
     Playground * m_playground;
-    QAction    * m_actionClose;
 
     About      * m_dialogAbout;
     Settings   * m_dialogSettings;
 
-    int          m_highestScore;
+    int          m_bestScore;
 
     QSettings  * m_settings;
-    QString      m_stsHighOption;
+    QString      m_stsBestScore;
     QString      m_stsFieldSize;
     QString      m_stsStyle;
 };

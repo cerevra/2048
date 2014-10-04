@@ -44,16 +44,16 @@ void Node::setRectStyle(Style style)
 
 void Node::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    QPainter painter     (this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.drawPixmap(0, 0, m_pixmap);
+    painter.drawPixmap   (0, 0, m_pixmap);
 }
 
 void Node::resizeEvent(QResizeEvent *event)
 {
     m_size   = event->size().height();
 
-    m_font   = this->font();
+    m_font   = this ->font();
     m_font.setPointSizeF(m_size/3);
     m_digitY = (m_size + m_font.pointSize())*0.5;
 
@@ -72,15 +72,15 @@ void Node::refreshPix()
     painter.setPen  (m_color);
     painter.setBrush(m_color);
 
-    if (m_style == Style::Classic)
+    if      (m_style == Style::Classic)
         painter.drawRoundedRect(rect, m_size/5, m_size/5);
-    else if (m_style == Style::Metro)
+    else if (m_style == Style::Metro  )
         painter.drawRect(rect);
 
-    QFontMetrics fontMetrics(m_font);
-    QString valueStr  = QVariant(m_value).toString();
-    painter.setPen  (m_colors[0]);
-    painter.setFont (m_font);
+    QFontMetrics fontMetrics   (m_font);
+    QString valueStr = QVariant(m_value).toString();
+    painter.setPen  ( m_colors[0]);
+    painter.setFont ( m_font);
     painter.drawText((m_size - fontMetrics.width(valueStr))*0.5,
                       m_digitY,
                       valueStr);

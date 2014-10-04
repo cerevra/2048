@@ -138,8 +138,14 @@
    </property>
   </action>
   <action name="actionExit">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionAbout">
