@@ -112,7 +112,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::gameIsOver()
 {
-    QMessageBox::information(this, QString("Game is over!"), QString("Next time, bro..."));
+    QMessageBox::information(this, tr("Game is over!"), tr("Next time, bro..."));
 
     m_playground->resetGrid();
 }
@@ -123,10 +123,10 @@ void MainWindow::setMaximumNode(int max)
 
     if (max == 2048)
         QMessageBox::information(this,
-                                 QString("You win!"),
-                                 QString("You got a node with 2048!\n"
-                                         "Here should be girls and beer but I'm not sure about your age.\n"
-                                         "So... Congratulations!"));
+                                 tr("You win!"),
+                                 tr("You got a node with 2048!\n"
+                                    "Here should be girls and beer but I'm not sure about your age.\n"
+                                    "So... Congratulations!"));
 }
 
 void MainWindow::setTotalScore(int total)
