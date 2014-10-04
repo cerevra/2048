@@ -6,7 +6,7 @@
     <message>
         <location filename="about.ui" line="32"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>О программе</translation>
     </message>
     <message>
         <location filename="about.ui" line="47"/>
@@ -16,12 +16,12 @@ It was designed with Qt5. It&apos;s just my first step in gamedev. Everything is
 
 Author: Igor Klevanets
 e-mail: cerevra@gmail.com</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="about.ui" line="81"/>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>Это небольшая игра: 2048.
+
+Она работана с помощью библиотеки Qt5. Это мой первый опыт в разработке игр. Всё делалось ради удовольствия и самообучения.
+
+Автор: Игорь Клеванец
+e-mail: cerevra@gmail.com</translation>
     </message>
 </context>
 <context>
@@ -29,94 +29,96 @@ e-mail: cerevra@gmail.com</source>
     <message>
         <location filename="mainwindow.ui" line="55"/>
         <source>Total score</source>
-        <translation type="unfinished"></translation>
+        <translation>Счет</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="78"/>
         <source>Best score</source>
         <oldsource>Highest score</oldsource>
-        <translation type="unfinished"></translation>
+        <translation>Лучший счет</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="101"/>
         <source>Max node</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимум</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="119"/>
         <source>Menu</source>
         <oldsource>Game</oldsource>
-        <translation type="unfinished"></translation>
+        <translation>Меню</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="126"/>
         <source>?</source>
-        <translation type="unfinished"></translation>
+        <translation>?</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="136"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="141"/>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Выход</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="146"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>О программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="115"/>
-        <source>Game is over!</source>
-        <translation type="unfinished"></translation>
+        <location filename="mainwindow.cpp" line="122"/>
+        <source>Game over!</source>
+        <translation>Игра окончена!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="115"/>
+        <location filename="mainwindow.cpp" line="120"/>
         <source>Next time, bro...</source>
-        <translation type="unfinished"></translation>
+        <translation>В следующий раз все получится...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="126"/>
+        <location filename="mainwindow.cpp" line="118"/>
+        <source>You are the winner!</source>
+        <translation>Ты победил!</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="133"/>
         <source>You win!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ты выйграл!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="127"/>
+        <location filename="mainwindow.cpp" line="134"/>
         <source>You got a node with 2048!
 Here should be girls and beer but I&apos;m not sure about your age.
 So... Congratulations!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ты сумел собрать 2048 очков в одном блоке!
+По-хорошему здесь должны быть девчонки и пиво, но я не знаю, сколько тебе лет.
+Ну... Поздравляю!</translation>
     </message>
 </context>
 <context>
     <name>Settings</name>
     <message>
         <location filename="settings.ui" line="26"/>
-        <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <source>Settings</source>
+        <translation>Настройки</translation>
     </message>
     <message>
         <location filename="settings.ui" line="41"/>
         <source>Size of field:</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер поля:</translation>
     </message>
     <message>
         <location filename="settings.ui" line="68"/>
         <source>Style</source>
-        <translation type="unfinished"></translation>
+        <translation>Стиль оформления</translation>
     </message>
     <message>
         <location filename="settings.ui" line="86"/>
         <source>Classic</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="settings.ui" line="102"/>
-        <source>Windows 8 (Metro)</source>
-        <translation type="unfinished"></translation>
+        <translation>Классический</translation>
     </message>
 </context>
 </TS>
