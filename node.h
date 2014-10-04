@@ -28,6 +28,8 @@ signals:
 public slots:
 
 private:
+    void refreshPix    ();
+
     qreal log2(qreal val);
 
     class ColorHandler
@@ -35,7 +37,7 @@ private:
     public:
         ColorHandler()
         {
-            m_colors.push_back(QColor(176, 196, 222));// background
+            m_colors.push_back(QColor(176, 196, 222));// text color
             m_colors.push_back(QColor(74 , 120, 27 ));
             m_colors.push_back(QColor(188, 137, 2  ));
             m_colors.push_back(QColor(175, 102, 42 ));
@@ -74,6 +76,8 @@ private:
     int     m_digitY;
 
     Style   m_style;
+
+    QPixmap m_pixmap;
 };
 
 #endif // NODE_H
