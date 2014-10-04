@@ -7,7 +7,7 @@ Settings::Settings(QWidget *parent)
     , m_size (0                   )
     , m_style(Styles::defaultStyle)
 {
-    ui->setupUi(this);
+    ui  ->setupUi       (this);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okPressed    ()));
@@ -29,10 +29,10 @@ void Settings::setRectStyle(Style style)
 {
     m_style = style;
 
-    if (style == Style::Classic)
+    if      (style == Style::Classic)
         ui->radioButton_styleClassic->toggle();
-    else if (style == Style::Metro)
-        ui->radioButton_styleMetro->toggle();
+    else if (style == Style::Metro  )
+        ui->radioButton_styleMetro  ->toggle();
 }
 
 void Settings::okPressed()
@@ -43,23 +43,23 @@ void Settings::okPressed()
     quint8 newSize = ui->spinBox->value();
     if (newSize != m_size)
     {
-        m_size = newSize;
+        m_size          = newSize;
         settingsChanged = true;
         emit fieldSize(m_size);
     }
 
     // Style
     Style newStyle;
-    if (ui->radioButton_styleClassic->isChecked())
+    if      (ui->radioButton_styleClassic->isChecked())
         newStyle = Style::Classic;
-    else if (ui->radioButton_styleMetro->isChecked())
+    else if (ui->radioButton_styleMetro  ->isChecked())
         newStyle = Style::Metro;
 
     if (newStyle != m_style)
     {
-        m_style = newStyle;
+        m_style         = newStyle;
         settingsChanged = true;
-        emit style    (m_style);
+        emit style (m_style);
     }
 
     if (settingsChanged)
@@ -70,8 +70,8 @@ void Settings::cancelPressed()
 {
     ui->spinBox->setValue(m_size);
 
-    if (m_style == Style::Classic)
+    if      (m_style == Style::Classic)
         ui->radioButton_styleClassic->toggle();
-    else if (m_style == Style::Metro)
+    else if (m_style == Style::Metro  )
         ui->radioButton_styleMetro  ->toggle();
 }

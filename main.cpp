@@ -4,18 +4,18 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
 
     QTranslator translator;
-    translator.load("tr_ru", a.applicationDirPath());
-    a.installTranslator(&translator);
+    translator.load("tr_ru", app.applicationDirPath());
+    app.installTranslator(&translator);
 
     QApplication::setOrganizationName  ("Cerevra's soft");
     QApplication::setOrganizationDomain("unconditional.address");
     QApplication::setApplicationName   ("2048");
 
-    MainWindow w;
-    w.show();
+    MainWindow window;
+    window.show();
 
-    return a.exec();
+    return app.exec();
 }

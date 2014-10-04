@@ -118,6 +118,7 @@
     <property name="title">
      <string>Menu</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
    </widget>
@@ -137,13 +138,24 @@
    </property>
   </action>
   <action name="actionExit">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New Game</string>
    </property>
   </action>
  </widget>

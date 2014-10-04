@@ -10,7 +10,9 @@
 class Node : public QWidget
 {
 public:
-    explicit Node(quint16 value, QWidget *parent = 0, Style style = Styles::defaultStyle);
+    explicit Node      (quint16  value,
+                        QWidget *parent = 0,
+                        Style    style  = Styles::defaultStyle);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
@@ -23,19 +25,17 @@ protected:
     void paintEvent    (QPaintEvent  *);
     void resizeEvent   (QResizeEvent *event);
 
-signals:
-
-public slots:
-
 private:
-    qreal log2(qreal val);
+    void refreshPix    ();
+
+    static qreal log2  (qreal val);
 
     class ColorHandler
     {
     public:
         ColorHandler()
         {
-            m_colors.push_back(QColor(176, 196, 222));// background
+            m_colors.push_back(QColor(176, 196, 222));// text color
             m_colors.push_back(QColor(74 , 120, 27 ));
             m_colors.push_back(QColor(188, 137, 2  ));
             m_colors.push_back(QColor(175, 102, 42 ));
@@ -53,7 +53,7 @@ private:
             {
                 index -= m_colors.size();
 
-                if (!index)
+                if ( !index)
                     ++index;
             }
 
@@ -74,6 +74,8 @@ private:
     int     m_digitY;
 
     Style   m_style;
+
+    QPixmap m_pixmap;
 };
 
 #endif // NODE_H

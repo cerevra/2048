@@ -7,16 +7,16 @@ Style   Styles::defaultStyle = Style::Classic;
 
 QString Styles::resolve(Style style)
 {
-    if (style == Style::Classic)
+    if      (style == Style::Classic)
         return Styles::classic;
-    else if (style == Style::Metro)
+    else if (style == Style::Metro  )
         return Styles::metro;
 }
 
 Style Styles::resolve(QString style)
 {
-    if (style == Styles::classic)
+    if      (style == Styles::classic)
         return Style::Classic;
-    else if (style == Styles::metro)
+    else if (style == Styles::metro  )
         return Style::Metro;
 }
