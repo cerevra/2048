@@ -112,7 +112,14 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::gameIsOver()
 {
-    QMessageBox::information(this, tr("Game is over!"), tr("Next time, bro..."));
+    QString msg;
+
+    if (int(ui->lcdNumber_maxNode->value()) >= 2048)
+        msg = tr("You are the winner!");
+    else
+        msg = tr("Next time, bro...");
+
+    QMessageBox::information(this, tr("Game over!"), msg);
 
     m_playground->resetGrid();
 }
