@@ -135,10 +135,10 @@ void Playground::resizeEvent(QResizeEvent *event)
 
 void Playground::initGrid()
 {
-    m_grid = (Node***) malloc (m_fieldSize*sizeof(Node***));
+    m_grid = new Node**[m_fieldSize];
     for(int x = 0; x < m_fieldSize; ++x)
     {
-        m_grid[x] = (Node**) malloc (m_fieldSize*sizeof(Node**));
+        m_grid[x] = new Node*[m_fieldSize];
         for(int y = 0; y < m_fieldSize; ++y)
             m_grid[x][y] = nullptr;
     }
@@ -154,9 +154,9 @@ void Playground::clearGrid()
         for(int y = 0; y < m_fieldSize; ++y)
             delete m_grid[x][y];
 
-        free(m_grid[x]);
+        delete[] m_grid[x];
     }
-    free(m_grid);
+    delete[] m_grid;
 }
 
 void Playground::initAnimation(bool firstStart)
