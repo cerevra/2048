@@ -32,3 +32,5 @@ FORMS    += mainwindow.ui \
     settings.ui
 
 QMAKE_CXXFLAGS += -std=c++0x
+
+TRANSLATIONS   += tr_ru.ts

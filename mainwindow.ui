@@ -23,7 +23,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string notr="true">2048</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLCDNumber" name="lcdNumber_totalScore">
@@ -75,7 +75,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Highest score</string>
+     <string>Best score</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdNumber_maxNode">
@@ -108,7 +108,7 @@
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -116,7 +116,7 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>Game</string>
+     <string>Menu</string>
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
