@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionExit    , SIGNAL(triggered()),
             this              , SLOT  (close    ()));
 
+    connect(ui->actionNew     , SIGNAL(triggered()),
+            m_playground      , SLOT  (resetGrid()));
+
     readPrevSession();
 
     setMaximumNode(m_playground->getMaxNode ());

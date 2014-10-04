@@ -49,47 +49,52 @@ e-mail: cerevra@gmail.com</translation>
         <translation>Меню</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="126"/>
+        <location filename="mainwindow.ui" line="127"/>
         <source>?</source>
         <translation>?</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="136"/>
+        <location filename="mainwindow.ui" line="137"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="141"/>
+        <location filename="mainwindow.ui" line="142"/>
         <source>Exit</source>
         <translation>Выход</translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="146"/>
+        <location filename="mainwindow.ui" line="147"/>
         <source>About</source>
         <translation>О программе</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="122"/>
+        <location filename="mainwindow.ui" line="152"/>
+        <source>New Game</source>
+        <translation>Новая игра</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="125"/>
         <source>Game over!</source>
         <translation>Игра окончена!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="120"/>
+        <location filename="mainwindow.cpp" line="123"/>
         <source>Next time, bro...</source>
         <translation>В следующий раз все получится...</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="118"/>
+        <location filename="mainwindow.cpp" line="121"/>
         <source>You are the winner!</source>
         <translation>Ты победил!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="133"/>
+        <location filename="mainwindow.cpp" line="136"/>
         <source>You win!</source>
         <translation>Ты выйграл!</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="134"/>
+        <location filename="mainwindow.cpp" line="137"/>
         <source>You got a node with 2048!
 Here should be girls and beer but I&apos;m not sure about your age.
 So... Congratulations!</source>

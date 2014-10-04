@@ -25,7 +25,6 @@ public:
     explicit Playground(QWidget *parent = 0);
     ~Playground();
 
-    void   resetGrid   ();
     quint8 fieldSize   () const;
 
     quint16 getMaxNode () const;
@@ -41,6 +40,7 @@ signals:
     void totalScore    (int total);
 
 public slots:
+    void   resetGrid   ();
     void setFieldSize  (quint8 size);
     void setRectStyle  (Style style);
 
