@@ -19,19 +19,20 @@
   <property name="font">
    <font>
     <family>Arial</family>
+    <pointsize>12</pointsize>
    </font>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string notr="true">2048</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLCDNumber" name="lcdNumber_totalScore">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -46,8 +47,8 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>71</width>
-      <height>16</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -58,9 +59,9 @@
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
    </widget>
@@ -69,21 +70,21 @@
      <rect>
       <x>150</x>
       <y>10</y>
-      <width>81</width>
-      <height>16</height>
+      <width>101</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Highest score</string>
+     <string>Best score</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdNumber_maxNode">
     <property name="geometry">
      <rect>
       <x>270</x>
-      <y>30</y>
+      <y>40</y>
       <width>111</width>
-      <height>23</height>
+      <height>30</height>
      </rect>
     </property>
    </widget>
@@ -92,8 +93,8 @@
      <rect>
       <x>280</x>
       <y>10</y>
-      <width>61</width>
-      <height>16</height>
+      <width>81</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -115,8 +116,9 @@
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>Game</string>
+     <string>Menu</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionSettings"/>
     <addaction name="actionExit"/>
    </widget>
@@ -136,13 +138,24 @@
    </property>
   </action>
   <action name="actionExit">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New Game</string>
    </property>
   </action>
  </widget>

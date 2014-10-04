@@ -3,14 +3,16 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QSettings>
 
 #include "about.h"
 #include "settings.h"
 
 #include "playground.h"
+#include "styles.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -18,38 +20,42 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow   (QWidget *parent = 0);
     ~MainWindow();
 
-    bool eventFilter(QObject * watched, QEvent * event);
+    bool eventFilter      (QObject * watched, QEvent * event);
 
 protected:
-    void resizeEvent(QResizeEvent *event              );
+    void resizeEvent      (QResizeEvent *event              );
 
 public slots:
-    void gameIsOver       ();
+    void gameOver         ();
 
     void setMaximumNode   (int max);
     void setTotalScore    (int total);
 
-protected slots:
-    void transmitFieldSize();
+    void saveCurrSession  ();
 
 private:
+    void readPrevSession  ();
+
     Ui::MainWindow *ui;
 
     int          m_topMargin;
     int          m_lftMargin;
     int          m_botMargin;
     int          m_rgtMargin;
-    QGridLayout* m_gridLayout;
     Playground * m_playground;
-    QAction    * m_actionClose;
 
     About      * m_dialogAbout;
     Settings   * m_dialogSettings;
 
-    int          m_highestScore;
+    int          m_bestScore;
+
+    QSettings  * m_settings;
+    QString      m_stsBestScore;
+    QString      m_stsFieldSize;
+    QString      m_stsStyle;
 };
 
 #endif // MAINWINDOW_H
