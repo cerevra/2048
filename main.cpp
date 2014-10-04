@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     QTranslator translator;
-    translator.load("tr_ru", app.applicationDirPath());
+    translator.load(QLocale::system(), "tr", "_", app.applicationDirPath());
     app.installTranslator(&translator);
 
     QApplication::setOrganizationName  ("Cerevra's soft");
