@@ -7,4 +7,4 @@ Author: Igor Klevanets
 e-mail: cerevra@gmail.com
 
 bin:
-https://drive.google.com/file/d/0BzpKwW4TGH3talFHWVB4dWdsTjQ/view?usp=sharing
+https://sourceforge.net/projects/cerevra2048/
