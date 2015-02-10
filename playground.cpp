@@ -204,6 +204,12 @@ void Playground::nodeShow()
     m_toDelete.clear();
 }
 
+void Playground::endOfAnimation()
+{
+    m_animCreate->deleteLater();
+    m_isAnimationRunning = false;
+}
+
 void Playground::initGrid()
 {
     m_maximumNode  = 0;
@@ -237,8 +243,8 @@ void Playground::clearGrid()
 void Playground::initAnimation(bool firstStart)
 {
     m_animCreate = new QParallelAnimationGroup();
-    connect(m_animCreate, SIGNAL(finished   ()),
-            m_animCreate, SLOT  (deleteLater()));
+    connect(m_animCreate, SIGNAL(finished       ()),
+            this        , SLOT  (endOfAnimation ()));
 
     if (!firstStart)
     {
@@ -254,6 +260,9 @@ void Playground::initAnimation(bool firstStart)
 
 void Playground::keyPress(Playground::Direction direction)
 {
+    if (m_isAnimationRunning)
+        return;
+
     if (moveRoutine(direction))
         if (!generateNewNode())
             checkForGameOver();
@@ -295,7 +304,10 @@ bool Playground::generateNewNode()
     }
 
     if (!m_firstDisplay)
+    {
         m_animMove->start();
+        m_isAnimationRunning = true;
+    }
 
     return vacantPlaces.size() - 1;
 }

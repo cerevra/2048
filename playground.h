@@ -50,8 +50,9 @@ protected:
     void    keyPressEvent    (QKeyEvent    *event);
     void    resizeEvent      (QResizeEvent *event);
 
-protected slots:
+private slots:
     void    nodeShow         ();
+    void    endOfAnimation   ();
 
 private:
     void    initGrid         ();
@@ -106,6 +107,8 @@ private:
     QPoint       m_firstPoint;
 
     QList<Node*> m_toDelete;
+
+    bool         m_isAnimationRunning = false;
 
     QParallelAnimationGroup* m_animCreate;
     QParallelAnimationGroup* m_animMove;
