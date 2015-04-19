@@ -15,7 +15,7 @@ public:
     explicit Node      (quint16  value,
                         QWidget *parent = 0);
 
-    quint16 value      () const;
+    inline quint16 value() const;
     void    setValue   (const quint16& value);
 
     const QColor& color() const;
@@ -70,11 +70,17 @@ private:
     QColor  m_color;
 
     QFont   m_font;
-    int     m_size;
-    int     m_digitY;
+    int     m_size   = 0;
+    int     m_digitY = 0;
 
     QPixmap m_pixmap;
 };
 
 typedef std::shared_ptr<Node> SpNode;
+
+quint16 Node::value() const
+{
+    return m_value;
+}
+
 #endif // NODE_H

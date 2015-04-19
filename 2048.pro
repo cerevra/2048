@@ -19,6 +19,7 @@ SOURCES += main.cpp\
     about.cpp \
     settings.cpp \
     styles.cpp \
+    move_p.cpp \
     move.cpp
 
 HEADERS  += mainwindow.h \
@@ -27,7 +28,8 @@ HEADERS  += mainwindow.h \
     about.h \
     settings.h \
     styles.h \
-    move.h
+    move.h \
+    move_p.h
 
 FORMS    += mainwindow.ui \
     about.ui \

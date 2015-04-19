@@ -8,6 +8,7 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <memory>
+#include <vector>
 
 #include "node.h"
 #include "styles.h"
@@ -52,27 +53,23 @@ private:
     void    initGrid         ();
     void    clearGrid        ();
 
-    void    initAnimation    (bool firstStart = false);
+    void    initAnimation    ();
+    void    initFirstAnimation();
 
     void    keyPress         (const Move& move);
-    bool    generateNewNode  ();
+    void generateNewNode();
     void    checkForGameOver ();
-
-    bool    moveRoutine      (const Move& move);
-    std::pair<bool, bool>
-    moveToPoint              (const Move& move, int indexTo, int indexTop);
-    void    movePoint        (SpNode& nodeFrom, SpNode& nodeTo, const Move& move,
-                              int indexFrom, int indexTo, int indexTop);
 
     void    setRectSize      (int rectSize);
 
     void    addMoveAnimation  (SpNode node, const QPoint* from, const QPoint* to);
     void    addCreateAnimation(SpNode node, const QPoint* point);
     QPropertyAnimation* animationFactory(SpNode node);
-
+    void    setStartAnimPoint (QPropertyAnimation* anim, const QPoint* point, int size, int summ = 0);
+    void    setEndAnimPoint   (QPropertyAnimation* anim, const QPoint* point);
     void    checkMaxNode     (int val);
 
-    std::pair<QPoint, bool> generateNewPoint();
+    QPoint generateNewPoint();
     quint16                 generateNewValue();
 
     float   rnd01            ();
@@ -80,29 +77,34 @@ private:
 
     static const QColor m_backroundColor;
 
-    quint8       m_fieldSize;
-    int          m_rectSize;
-    qreal        m_rectMargin;
+    quint8       m_fieldSize  = 4;
+    int          m_rectSize   = 0;
+    qreal        m_rectMargin = 0;
+    int          m_rectInterval = m_rectSize + m_rectMargin;
 
-    int          m_xOffset;
-    int          m_yOffset;
+    int          m_xOffset    = 0;
+    int          m_yOffset    = 0;
 
-    SpNode**     m_grid;
+    int          m_maximumNode = 0;
+    int          m_totalScore  = 0;
 
-    int          m_maximumNode;
-    int          m_totalScore;
-
-    bool         m_firstDisplay;
+    bool         m_firstDisplay = true;
 
     SpNode       m_node;
     QPoint       m_firstPoint;
+
+    typedef std::vector<SpNode    > NodeColumn;
+    typedef std::vector<NodeColumn> Grid;
+    Grid         m_grid;
 
     QList<SpNode> m_toDelete;
 
     bool         m_isAnimationRunning = false;
 
-    QParallelAnimationGroup* m_animCreate;
-    QParallelAnimationGroup* m_animMove;
+    bool         m_gridHasEmptyNode;
+
+    QParallelAnimationGroup* m_animCreate = nullptr;
+    QParallelAnimationGroup* m_animMove   = nullptr;
 
     friend class Move;
 };

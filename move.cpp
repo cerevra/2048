@@ -1,78 +1,76 @@
+
 #include "move.h"
 
-#include "playground.h"
-
-SpNode& Move::getNodeColumnConst(int y, int x) const
+int& MvForward::moveIndex(int& arg) const
 {
-    return m_parent->m_grid[x][y];
+    return ++arg;
 }
 
-SpNode& Move::getNodeRowConst(int x, int y) const
+void MvForward::init()
 {
-    return m_parent->m_grid[x][y];
+    m_indexInit  = 0;
+    m_indexLimit = fieldSize();
 }
 
-quint8 Move::fieldSize() const
+int& MvBackward::moveIndex(int& arg) const
 {
-    return m_parent->m_fieldSize;
+    return --arg;
+}
+
+void MvBackward::init()
+{
+    m_indexInit  = fieldSize() - 1;
+    m_indexLimit = -1;
+}
+
+QPoint* MvInRow::coords(int x1, int x2) const
+{
+    return new QPoint(x1, x2);
+}
+
+QPoint* MvInColumn::coords(int x2, int x1) const
+{
+    return new QPoint(x1, x2);
+}
+
+MvForward::MvForward() {
+    m_arithmOper = std::plus<int>();
+    m_compare    = std::less<int>();
+}
+
+MvBackward::MvBackward() {
+    m_arithmOper = std::minus  <int>();
+    m_compare    = std::greater<int>();
+}
+
+MvInRow::MvInRow() {
+    m_access = std::mem_fn(&MvInRow::getNodeRowConst);
+}
+
+MvInColumn::MvInColumn() {
+    m_access = std::mem_fn(&MvInColumn::getNodeColumnConst);
 }
 
 MoveLeft::MoveLeft(Playground* parent)
 {
     m_parent = parent;
-
-    m_moveIndex  = incr;
-    m_arithmOper = std::plus<int>();
-    m_compare    = std::less<int>();
-
-    m_coords = coordinates;
-    m_access = std::mem_fn(&MoveLeft::getNodeRowConst);
-
-    m_indexInit = 0;
-    m_indexLimit = fieldSize();
+    init();
 }
 
 MoveRight::MoveRight(Playground* parent)
 {
     m_parent = parent;
-
-    m_moveIndex  = decr;
-    m_arithmOper = std::minus  <int>();
-    m_compare    = std::greater<int>();
-
-    m_coords = coordinates;
-    m_access = std::mem_fn(&MoveRight::getNodeRowConst);
-
-    m_indexInit = fieldSize() - 1;
-    m_indexLimit = -1;
+    init();
 }
 
 MoveUp::MoveUp(Playground* parent)
 {
     m_parent = parent;
-
-    m_moveIndex  = incr;
-    m_arithmOper = std::plus<int>();
-    m_compare    = std::less<int>();
-
-    m_coords = coordinatesInv;
-    m_access = std::mem_fn(&MoveUp::getNodeColumnConst);
-
-    m_indexInit = 0;
-    m_indexLimit = fieldSize();
+    init();
 }
 
 MoveDown::MoveDown(Playground* parent)
 {
     m_parent = parent;
-
-    m_moveIndex  = decr;
-    m_arithmOper = std::minus  <int>();
-    m_compare    = std::greater<int>();
-
-    m_coords = coordinatesInv;
-    m_access = std::mem_fn(&MoveDown::getNodeColumnConst);
-
-    m_indexInit = fieldSize() - 1;
-    m_indexLimit = -1;
+    init();
 }

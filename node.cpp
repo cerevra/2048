@@ -10,15 +10,8 @@ const Node::ColorHandler Node::m_colors = ColorHandler();
 
 Node::Node(quint16 value, QWidget *parent)
     : QWidget (parent)
-    , m_size  (0     )
-    , m_digitY(0     )
 {
     setValue(value);
-}
-
-quint16 Node::value() const
-{
-    return m_value;
 }
 
 void Node::setValue(const quint16 &value)
