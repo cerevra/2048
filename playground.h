@@ -6,35 +6,27 @@
 #include <QList>
 #include <QColor>
 #include <QParallelAnimationGroup>
+#include <QPropertyAnimation>
+#include <memory>
 
 #include "node.h"
 #include "styles.h"
+#include "move.h"
 
 class Playground : public QWidget
 {
-    typedef int&    (            *Movement   )(int&    );
-    typedef int     (            *Arithmetic )(int, int);
-    typedef bool    (            *Comparison )(int, int);
-    typedef Node ** (Playground::*NodeAccess )(int, int);
-    typedef QPoint* (            *Coordinates)(int, int);
-
-    enum class Direction {Up,
-                          Down,
-                          Right,
-                          Left};
-
     Q_OBJECT
 public:
     explicit Playground      (QWidget *parent = 0);
     ~Playground              ();
 
-    quint8  fieldSize        () const;
-    Style   style            () const;
-    quint16 getMaxNode       () const;
-    quint16 getTotalScr      () const;
+    inline quint8  fieldSize        () const;
+    inline quint16 getMaxNode       () const;
+    inline quint16 getTotalScr      () const;
 
 signals:
     void    needToRepaint    ();
+    void    needToRefreshPix ();
     void    gameOver         ();
 
     void    maximumNode      (int max);
@@ -43,12 +35,14 @@ signals:
 public slots:
     void    resetGrid        ();
     void    setFieldSize     (quint8 size);
-    void    setRectStyle     (Style style);
+    void    refreshStyle     ();
 
 protected:
     void    paintEvent       (QPaintEvent  *);
     void    keyPressEvent    (QKeyEvent    *event);
     void    resizeEvent      (QResizeEvent *event);
+    void    offsetOnResize   (QResizeEvent *event);
+    void    drawRectsOnResize(QResizeEvent *event);
 
 private slots:
     void    nodeShow         ();
@@ -60,30 +54,29 @@ private:
 
     void    initAnimation    (bool firstStart = false);
 
-    void    keyPress         (Direction direction);
+    void    keyPress         (const Move& move);
     bool    generateNewNode  ();
     void    checkForGameOver ();
 
-    bool    moveRoutine      (Direction direction);
+    bool    moveRoutine      (const Move& move);
+    std::pair<bool, bool>
+    moveToPoint              (const Move& move, int indexTo, int indexTop);
+    void    movePoint        (SpNode& nodeFrom, SpNode& nodeTo, const Move& move,
+                              int indexFrom, int indexTo, int indexTop);
 
     void    setRectSize      (int rectSize);
 
-    void    addAnimation     (Node* node, const QPoint* from, const QPoint* to);
+    void    addMoveAnimation  (SpNode node, const QPoint* from, const QPoint* to);
+    void    addCreateAnimation(SpNode node, const QPoint* point);
+    QPropertyAnimation* animationFactory(SpNode node);
+
+    void    checkMaxNode     (int val);
+
+    std::pair<QPoint, bool> generateNewPoint();
+    quint16                 generateNewValue();
 
     float   rnd01            ();
     quint16 rnd0or1          ();
-
-    static int&    incr              (int& arg);
-    static int&    decr              (int& arg);
-    static int     summ              (int x1, int x2);
-    static int     diff              (int x1, int x2);
-    static bool    grtn              (int x1, int x2);
-    static bool    lsth              (int x1, int x2);
-    static QPoint* coordinates       (int x , int y );
-    static QPoint* coordinatesInv    (int y , int x );
-           Node**  getNodeColumnConst(int y , int x );
-           Node**  getNodeRowConst   (int x , int y );
-
 
     static const QColor m_backroundColor;
 
@@ -94,24 +87,39 @@ private:
     int          m_xOffset;
     int          m_yOffset;
 
-    Node***      m_grid;
+    SpNode**     m_grid;
 
     int          m_maximumNode;
     int          m_totalScore;
 
-    Style        m_style;
-
     bool         m_firstDisplay;
 
-    Node*        m_node;
+    SpNode       m_node;
     QPoint       m_firstPoint;
 
-    QList<Node*> m_toDelete;
+    QList<SpNode> m_toDelete;
 
     bool         m_isAnimationRunning = false;
 
     QParallelAnimationGroup* m_animCreate;
     QParallelAnimationGroup* m_animMove;
+
+    friend class Move;
 };
+
+inline quint8 Playground::fieldSize() const
+{
+    return m_fieldSize;
+}
+
+inline quint16 Playground::getMaxNode() const
+{
+    return m_maximumNode;
+}
+
+inline quint16 Playground::getTotalScr() const
+{
+    return m_totalScore;
+}
 
 #endif // PLAYGROUND_H

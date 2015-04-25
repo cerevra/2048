@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include <QDialog>
+#include <QButtonGroup>
 
 #include "styles.h"
 
@@ -18,7 +19,7 @@ public:
     ~Settings         ();
 
     void setFieldSize (quint8 size);
-    void setRectStyle (Style  style);
+    void refreshStyle ();
 
 protected slots:
     void okPressed    ();
@@ -26,15 +27,23 @@ protected slots:
 
 signals:
     void fieldSize    (quint8 size);
-    void style        (Style  style);
+    void style        ();
 
     void changed      ();
 
 private:
-    Ui::Settings *ui;
+    void  init        ();
+    void  choiseStyle  ();
+    StyleId checkedStyle();
+
+    bool  trySetNewFieldSize();
+    bool  trySetNewStyle    ();
+
+
+    Ui::Settings* ui;
+    QButtonGroup* m_buttonGrp;
 
     quint8 m_size;
-    Style  m_style;
 };
 
 #endif // SETTINGS_H

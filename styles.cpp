@@ -1,22 +1,29 @@
 
 #include "styles.h"
 
-QString Styles::classic      = "Classic";
-QString Styles::metro        = "Metro";
-Style   Styles::defaultStyle = Style::Classic;
-
-QString Styles::resolve(Style style)
+Style::Style()
 {
-    if      (style == Style::Classic)
-        return Styles::classic;
-    else if (style == Style::Metro  )
-        return Styles::metro;
+    setId(StyleId::Classic);
 }
 
-Style Styles::resolve(QString style)
+Style& Style::getInstance() {
+    static Style instance;
+    return instance;
+}
+
+void Style::setId(StyleId id) {
+    switch (id) {
+    case StyleId::Classic: m_state.reset(new StyleClassicState); break;
+    case StyleId::Metro  : m_state.reset(new StyleMetroState  ); break;
+    }
+}
+
+void Style::StyleClassicState::drawRect(QPainter& painter, QRect& rect, qreal roundRadius)
 {
-    if      (style == Styles::classic)
-        return Style::Classic;
-    else if (style == Styles::metro  )
-        return Style::Metro;
+    painter.drawRoundedRect(rect, roundRadius, roundRadius);
+}
+
+void Style::StyleMetroState::drawRect(QPainter& painter, QRect& rect, qreal )
+{
+    painter.drawRect(rect);
 }

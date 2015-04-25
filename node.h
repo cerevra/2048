@@ -4,30 +4,30 @@
 #include <QObject>
 #include <QColor>
 #include <QWidget>
+#include <memory>
 
 #include "styles.h"
 
 class Node : public QWidget
 {
+    Q_OBJECT
 public:
     explicit Node      (quint16  value,
-                        QWidget *parent = 0,
-                        Style    style  = Styles::defaultStyle);
+                        QWidget *parent = 0);
 
     quint16 value      () const;
     void    setValue   (const quint16& value);
 
     const QColor& color() const;
 
-    void setRectStyle  (Style style);
+public slots:
+    void refreshPix    ();
 
 protected:
     void paintEvent    (QPaintEvent  *);
     void resizeEvent   (QResizeEvent *event);
 
 private:
-    void refreshPix    ();
-
     static qreal log2  (qreal val);
 
     class ColorHandler
@@ -73,9 +73,8 @@ private:
     int     m_size;
     int     m_digitY;
 
-    Style   m_style;
-
     QPixmap m_pixmap;
 };
 
+typedef std::shared_ptr<Node> SpNode;
 #endif // NODE_H

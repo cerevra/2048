@@ -18,14 +18,16 @@ SOURCES += main.cpp\
     node.cpp \
     about.cpp \
     settings.cpp \
-    styles.cpp
+    styles.cpp \
+    move.cpp
 
 HEADERS  += mainwindow.h \
     playground.h \
     node.h \
     about.h \
     settings.h \
-    styles.h
+    styles.h \
+    move.h
 
 FORMS    += mainwindow.ui \
     about.ui \

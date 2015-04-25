@@ -8,11 +8,10 @@
 
 const Node::ColorHandler Node::m_colors = ColorHandler();
 
-Node::Node(quint16 value, QWidget *parent, Style style)
+Node::Node(quint16 value, QWidget *parent)
     : QWidget (parent)
     , m_size  (0     )
     , m_digitY(0     )
-    , m_style (style )
 {
     setValue(value);
 }
@@ -33,13 +32,6 @@ void Node::setValue(const quint16 &value)
 const QColor& Node::color() const
 {
     return m_color;
-}
-
-void Node::setRectStyle(Style style)
-{
-    m_style = style;
-
-    refreshPix();
 }
 
 void Node::paintEvent(QPaintEvent *)
@@ -67,15 +59,11 @@ void Node::refreshPix()
 
     QPainter painter(&m_pixmap);
     painter.initFrom(this);
-
-    QRect rect(0, 0, m_size, m_size);
     painter.setPen  (m_color);
     painter.setBrush(m_color);
 
-    if      (m_style == Style::Classic)
-        painter.drawRoundedRect(rect, m_size/5, m_size/5);
-    else if (m_style == Style::Metro  )
-        painter.drawRect(rect);
+    QRect rect(0, 0, m_size, m_size);
+    Style::getInstance().drawRect(painter, rect, m_size/5);
 
     QFontMetrics fontMetrics   (m_font);
     QString valueStr = QVariant(m_value).toString();

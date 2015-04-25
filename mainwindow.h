@@ -20,24 +20,40 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow   (QWidget *parent = 0);
+    explicit MainWindow    (QWidget *parent = 0);
     ~MainWindow();
 
-    bool eventFilter      (QObject * watched, QEvent * event);
+    bool eventFilter       (QObject * watched, QEvent * event);
 
 protected:
-    void resizeEvent      (QResizeEvent *event              );
+    void resizeEvent       (QResizeEvent *event              );
 
 public slots:
-    void gameOver         ();
+    void gameOver          ();
 
-    void setMaximumNode   (int max);
-    void setTotalScore    (int total);
+    void setMaximumNode    (int max);
+    void setTotalScore     (int total);
 
-    void saveCurrSession  ();
+    void saveCurrSession   ();
 
 private:
-    void readPrevSession  ();
+    void init              ();
+    void initPlayground    ();
+    void initAboutDialog   ();
+    void initSettingsDialog();
+    void initActions       ();
+    void initSettings      ();
+
+    void readPrevSession   ();
+    void readPrevBestScore ();
+    void readPrevFieldSize ();
+    void readPrevStyle     ();
+
+    void showMsgBox        (const QString& header, const QString& body);
+
+    static const QString m_stsBestScore;
+    static const QString m_stsFieldSize;
+    static const QString m_stsStyle;
 
     Ui::MainWindow *ui;
 
@@ -53,9 +69,6 @@ private:
     int          m_bestScore;
 
     QSettings  * m_settings;
-    QString      m_stsBestScore;
-    QString      m_stsFieldSize;
-    QString      m_stsStyle;
 };
 
 #endif // MAINWINDOW_H
