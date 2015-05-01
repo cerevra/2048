@@ -26,7 +26,7 @@ MoveLeft::MoveLeft(Playground* parent)
     m_compare    = std::less<int>();
 
     m_coords = coordinates;
-    m_access = getNodeRowConst;
+    m_access = std::mem_fn(&MoveLeft::getNodeRowConst);
 
     m_indexInit = 0;
     m_indexLimit = fieldSize();
@@ -41,7 +41,7 @@ MoveRight::MoveRight(Playground* parent)
     m_compare    = std::greater<int>();
 
     m_coords = coordinates;
-    m_access = getNodeRowConst;
+    m_access = std::mem_fn(&MoveRight::getNodeRowConst);
 
     m_indexInit = fieldSize() - 1;
     m_indexLimit = -1;
@@ -56,7 +56,7 @@ MoveUp::MoveUp(Playground* parent)
     m_compare    = std::less<int>();
 
     m_coords = coordinatesInv;
-    m_access = getNodeColumnConst;
+    m_access = std::mem_fn(&MoveUp::getNodeColumnConst);
 
     m_indexInit = 0;
     m_indexLimit = fieldSize();
@@ -71,7 +71,7 @@ MoveDown::MoveDown(Playground* parent)
     m_compare    = std::greater<int>();
 
     m_coords = coordinatesInv;
-    m_access = getNodeColumnConst;
+    m_access = std::mem_fn(&MoveDown::getNodeColumnConst);
 
     m_indexInit = fieldSize() - 1;
     m_indexLimit = -1;
