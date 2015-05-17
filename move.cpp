@@ -23,14 +23,14 @@ void MvBackward::init()
     m_indexLimit = -1;
 }
 
-QPoint* MvInRow::coords(int x1, int x2) const
+QPoint MvInRow::coords(int x1, int x2) const
 {
-    return new QPoint(x1, x2);
+    return QPoint(x1, x2);
 }
 
-QPoint* MvInColumn::coords(int x2, int x1) const
+QPoint MvInColumn::coords(int x2, int x1) const
 {
-    return new QPoint(x1, x2);
+    return QPoint(x1, x2);
 }
 
 MvForward::MvForward() {

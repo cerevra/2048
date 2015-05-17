@@ -91,7 +91,7 @@ void Playground::resizeEvent(QResizeEvent *event)
     {
         m_firstDisplay = false;
 
-        addCreateAnimation(m_node, &m_firstPoint);
+        addCreateAnimation(m_node, m_firstPoint);
         m_node      ->show ();
         m_animCreate->start();
     }
@@ -211,7 +211,7 @@ void Playground::generateNewNode()
     if (m_firstDisplay)
         m_firstPoint = newPoint;
     else {
-        addCreateAnimation(m_node, &newPoint);
+        addCreateAnimation(m_node, newPoint);
         m_animMove->start();
         m_isAnimationRunning = true;
     }
@@ -243,7 +243,7 @@ void Playground::setRectSize(int rectSize)
     m_rectInterval = m_rectSize + m_rectMargin;
 }
 
-void Playground::addMoveAnimation(SpNode node, const QPoint* from, const QPoint* to)
+void Playground::addMoveAnimation(SpNode node, const QPoint& from, const QPoint& to)
 {
     QPropertyAnimation* anim = animationFactory(node);
 
@@ -253,7 +253,7 @@ void Playground::addMoveAnimation(SpNode node, const QPoint* from, const QPoint*
     m_animMove->addAnimation(anim);
 }
 
-void Playground::addCreateAnimation(SpNode node, const QPoint* point)
+void Playground::addCreateAnimation(SpNode node, const QPoint& point)
 {
     QPropertyAnimation* anim = animationFactory(node);
 
@@ -274,19 +274,19 @@ QPropertyAnimation* Playground::animationFactory(SpNode node)
 }
 
 void Playground::setStartAnimPoint(QPropertyAnimation* anim,
-                                   const QPoint* point,
+                                   const QPoint& point,
                                    int size,
                                    int summ)
 {
-    anim->setStartValue(QRect(m_xOffset + point->x()*m_rectInterval + summ,
-                              m_yOffset + point->y()*m_rectInterval + summ,
+    anim->setStartValue(QRect(m_xOffset + point.x()*m_rectInterval + summ,
+                              m_yOffset + point.y()*m_rectInterval + summ,
                               size, size));
 }
 
-void Playground::setEndAnimPoint(QPropertyAnimation* anim, const QPoint* point)
+void Playground::setEndAnimPoint(QPropertyAnimation* anim, const QPoint& point)
 {
-    anim->setEndValue  (QRect(m_xOffset + point->x()*m_rectInterval,
-                              m_yOffset + point->y()*m_rectInterval,
+    anim->setEndValue  (QRect(m_xOffset + point.x()*m_rectInterval,
+                              m_yOffset + point.y()*m_rectInterval,
                               m_rectSize, m_rectSize));
 }
 

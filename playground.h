@@ -62,11 +62,11 @@ private:
 
     void    setRectSize      (int rectSize);
 
-    void    addMoveAnimation  (SpNode node, const QPoint* from, const QPoint* to);
-    void    addCreateAnimation(SpNode node, const QPoint* point);
+    void    addMoveAnimation  (SpNode node, const QPoint& from, const QPoint& to);
+    void    addCreateAnimation(SpNode node, const QPoint& point);
     QPropertyAnimation* animationFactory(SpNode node);
-    void    setStartAnimPoint (QPropertyAnimation* anim, const QPoint* point, int size, int summ = 0);
-    void    setEndAnimPoint   (QPropertyAnimation* anim, const QPoint* point);
+    void    setStartAnimPoint (QPropertyAnimation* anim, const QPoint& point, int size, int summ = 0);
+    void    setEndAnimPoint   (QPropertyAnimation* anim, const QPoint& point);
     void    checkMaxNode     (int val);
 
     QPoint generateNewPoint();

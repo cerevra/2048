@@ -19,7 +19,7 @@ public:
     void movePoint(SpNode& nodeFrom, SpNode& nodeTo, int indexTo) const;
 
     virtual int& moveIndex(int& idx) const = 0;
-    virtual QPoint* coords(int x1, int x2) const = 0;
+    virtual QPoint coords(int x1, int x2) const = 0;
 
 protected:
     virtual void init() = 0;

@@ -27,14 +27,14 @@ class MvInRow : public virtual Move {
 public:
     MvInRow();
 
-    QPoint* coords(int x1, int x2) const;
+    QPoint coords(int x1, int x2) const;
 };
 
 class MvInColumn : public virtual Move {
 public:
     MvInColumn();
 
-    QPoint* coords(int x2, int x1) const;
+    QPoint coords(int x2, int x1) const;
 };
 
 class MoveLeft : public MvForward, public MvInRow {
